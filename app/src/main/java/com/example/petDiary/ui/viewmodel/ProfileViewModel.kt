@@ -7,19 +7,21 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.petDiary.data.repository.FirestorePetProfileRepository
 import com.example.petDiary.data.repository.LocalPetProfileRepository
+import com.example.petDiary.data.repository.PhotoRepository
 import com.example.petDiary.domain.model.PetProfile
 import com.example.petDiary.domain.repository.IPetProfileRepository
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
 class ProfileViewModel(application: Application) : AndroidViewModel(application) {
-
-    // Выбираем репозиторий в зависимости от того, залогинен ли пользователь
     private val repository: IPetProfileRepository = if (FirebaseAuth.getInstance().currentUser != null) {
         FirestorePetProfileRepository()
     } else {
         LocalPetProfileRepository(application)
     }
+
+    private val photoRepository = PhotoRepository(application)
+    private val isAuthorized = FirebaseAuth.getInstance().currentUser != null
 
     private val _petProfile = MutableLiveData<PetProfile>()
     val petProfile: LiveData<PetProfile> = _petProfile
@@ -49,12 +51,20 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun savePetProfile(profile: PetProfile) {
+    fun savePetProfile(profile: PetProfile, photoLocalPath: String? = null) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                repository.savePetProfile(profile)
-                _petProfile.value = profile
+                var finalProfile = profile
+
+                if (photoLocalPath != null) {
+                    val photoUrl = photoRepository.savePhoto(photoLocalPath, isAuthorized)
+                    finalProfile = profile.copy(photoPath = photoUrl)
+
+                }
+
+                repository.savePetProfile(finalProfile)
+                _petProfile.value = finalProfile
                 _hasSavedData.value = true
                 _error.value = null
             } catch (e: Exception) {

@@ -229,7 +229,7 @@ class ProfileFragment : Fragment() {
             photoPath = savedPhotoPath
         )
 
-        viewModel.savePetProfile(profile)
+        viewModel.savePetProfile(profile, savedPhotoPath)
         showSnackbar("Профиль питомца сохранён!")
     }
 

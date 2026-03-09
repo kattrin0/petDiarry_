@@ -12,20 +12,17 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.Observer
 import com.example.petDiary.R
-
 import com.example.petDiary.domain.model.Event
 import com.example.petDiary.domain.model.PetProfile
 import com.example.petDiary.ui.viewmodel.HomeViewModel
 import com.google.android.material.card.MaterialCardView
 import java.io.File
-import java.io.FileInputStream
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.random.Random
 
 class HomeFragment : Fragment() {
     private lateinit var viewModel: HomeViewModel
-
     private lateinit var tvTipEmoji: TextView
     private lateinit var tvTipTitle: TextView
     private lateinit var tvTipText: TextView
@@ -42,7 +39,8 @@ class HomeFragment : Fragment() {
     private lateinit var ivPetPhoto: ImageView
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(R.layout.fragment_home, container, false)
@@ -50,7 +48,6 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         viewModel = ViewModelProvider(requireActivity())[HomeViewModel::class.java]
         initViews(view)
         setupObservers()
@@ -80,20 +77,16 @@ class HomeFragment : Fragment() {
         viewModel.petProfile.observe(viewLifecycleOwner, Observer { profile ->
             updatePetProfile(profile)
         })
-
         viewModel.todayEvents.observe(viewLifecycleOwner, Observer { events ->
             updateTodayEvents(events)
         })
     }
 
     private fun updatePetProfile(profile: PetProfile) {
-        // Имя
-        tvPetName.text = if (profile.name.isNotBlank()) profile.name else "Имя не указано"
 
-        // Порода
+        tvPetName.text = if (profile.name.isNotBlank()) profile.name else "Имя не указано"
         tvPetBreed.text = if (profile.breed.isNotBlank()) profile.breed else "Порода не указана"
 
-        // Дата рождения → возраст
         if (profile.birthDate.isNotBlank()) {
             try {
                 val sdf = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
@@ -107,7 +100,6 @@ class HomeFragment : Fragment() {
                     val ageText = when {
                         age % 10 == 1 && age % 100 != 11 -> "$age год"
                         age % 10 in 2..4 && age % 100 !in 12..14 -> "$age года"
-                        age >= 5 || age == 0 -> "$age лет"
                         else -> "$age лет"
                     }
                     tvPetAge.text = ageText
@@ -124,47 +116,44 @@ class HomeFragment : Fragment() {
     }
 
     private fun loadPetPhoto(photoPath: String?) {
+        ivPetPhoto.setPadding(0, 0, 0, 0)
+
         if (photoPath != null) {
             try {
                 val file = File(photoPath)
                 if (file.exists() && file.length() > 0) {
-                    FileInputStream(file).use { inputStream ->
-                        val bitmap = BitmapFactory.decodeStream(inputStream)
-                        if (bitmap != null) {
-                            ivPetPhoto.setImageBitmap(bitmap)
-                            ivPetPhoto.scaleType = ImageView.ScaleType.CENTER_CROP
-                            ivPetPhoto.setPadding(0, 0, 0, 0)
-                            return
-                        }
+                    val bitmap = BitmapFactory.decodeFile(photoPath)
+                    if (bitmap != null) {
+                        ivPetPhoto.setImageBitmap(bitmap)
+                        return
                     }
+                }
+
+                // с Яндекс.Диска (URL)
+                if (photoPath.startsWith("https://")) {
+                    return
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
 
-        // Если фото нет или не удалось загрузить — ставим иконку лапы
         ivPetPhoto.setImageResource(R.drawable.ic_paw1)
-        ivPetPhoto.scaleType = ImageView.ScaleType.CENTER
         ivPetPhoto.setPadding(12, 12, 12, 12)
     }
-
     private fun updateTodayEvents(events: List<Event>) {
         llTodayEventsList.removeAllViews()
-
         if (events.isEmpty()) {
             tvNoTodayEvents.visibility = View.VISIBLE
             llTodayEventsList.visibility = View.GONE
         } else {
             tvNoTodayEvents.visibility = View.GONE
             llTodayEventsList.visibility = View.VISIBLE
-
             events.take(5).forEach { event ->
                 val eventView = createTodayEventView(event)
                 llTodayEventsList.addView(eventView)
             }
 
-            // Если событий больше 5, показываем счетчик
             if (events.size > 5) {
                 val moreView = TextView(requireContext()).apply {
                     text = "... и ещё ${events.size - 5}"
@@ -180,7 +169,6 @@ class HomeFragment : Fragment() {
     private fun createTodayEventView(event: Event): View {
         val view = LayoutInflater.from(requireContext())
             .inflate(R.layout.item_today_event_home, llTodayEventsList, false)
-
         val tvEventTime = view.findViewById<TextView>(R.id.tvEventTime)
         val tvEventTitle = view.findViewById<TextView>(R.id.tvEventTitle)
 
@@ -193,7 +181,6 @@ class HomeFragment : Fragment() {
         }
 
         tvEventTitle.text = event.title
-
         return view
     }
 
@@ -220,4 +207,3 @@ class HomeFragment : Fragment() {
         fun newInstance() = HomeFragment()
     }
 }
-

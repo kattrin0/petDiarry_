@@ -12,6 +12,9 @@ android {
         version = release(36)
     }
 
+    buildFeatures {
+        buildConfig = true
+    }
     defaultConfig {
         applicationId = "com.example.petDiary"
         minSdk = 26
@@ -20,7 +23,13 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "YANDEX_DISK_OAUTH_TOKEN", "\"y0__xDR2YD2Axi11T4g9vWB1RYwpfzn6QfhNewQKFNv49Q_7oKf2YNNhIysdQ\"")
     }
+
+
+
+
 
     buildTypes {
         release {

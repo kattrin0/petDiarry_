@@ -45,8 +45,7 @@ android {
                 "src/main/res-screen/home",
                 "src/main/res-screen/calendar",
                 "src/main/res-screen/map",
-                "src/main/res-screen/profile",
-                "src/main/res"
+                "src/main/res-screen/profile"
             )
         }
     }

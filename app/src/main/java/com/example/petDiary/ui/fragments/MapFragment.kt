@@ -1,10 +1,14 @@
 package com.example.petDiary.ui.fragments
 
 import android.Manifest
+import android.R.attr.alpha
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.PointF
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,6 +17,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -130,7 +135,6 @@ class MapFragment : Fragment(), UserLocationObjectListener {
 
     private fun setupObservers() {
         viewModel.userLocation.observe(viewLifecycleOwner) { location ->
-            // Location updates handled in onObjectAdded/onObjectUpdated
         }
 
         viewModel.searchResults.observe(viewLifecycleOwner) { results ->
@@ -298,13 +302,29 @@ class MapFragment : Fragment(), UserLocationObjectListener {
     private fun addPlacemark(point: Point, data: PlacemarkData) {
         val collection = mapObjects ?: return
         try {
-            val imageResource = if (data.isVetClinic) R.drawable.ic_map else R.drawable.ic_map
+            val imageResource = when {
+                data.isVetClinic -> R.drawable.ic_map1
+                else -> R.drawable.ic_map2
+            }
+
+            val drawable = ContextCompat.getDrawable(requireContext(), imageResource)
+            if (drawable == null) {
+                Log.e("MapFragment", "Не удалось загрузить ресурс: $imageResource")
+                return
+            }
+            val bitmap =  drawable.toBitmap()
+
 
             val placemark = collection.addPlacemark(point).apply {
-                setIcon(ImageProvider.fromResource(requireContext(), imageResource))
+                setIcon(ImageProvider.fromBitmap(bitmap))
                 setIconStyle(IconStyle().apply {
-                    scale = 0.8f
+
+                    scale = 0.045f
                     zIndex = 10f
+                    // Якорь: (0.5, 1.0) — низ по центру, чтобы пин указывал на координату
+                    // Если иконка квадратная/круглая — можно оставить (0.5, 0.5)
+                    anchor = PointF(0.5f, 0.5f)
+
                 })
                 userData = data
             }
@@ -318,8 +338,11 @@ class MapFragment : Fragment(), UserLocationObjectListener {
             }
 
             placemarks.add(placemark)
+            Log.d("MapFragment", " Метка добавлена: ${data.name}, тип: ${if (data.isVetClinic) "ветклиника" else "зоомагазин"}")
+
         } catch (e: Exception) {
-            Log.e("MapFragment", "Ошибка добавления метки", e)
+            Log.e("MapFragment", " Ошибка добавления метки для ${data.name}", e)
+            Snackbar.make(requireView(), "Не удалось добавить метку на карту", Snackbar.LENGTH_SHORT).show()
         }
     }
 
@@ -402,6 +425,7 @@ class MapFragment : Fragment(), UserLocationObjectListener {
             userLocationView.arrow.setIcon(
                 ImageProvider.fromResource(requireContext(), R.drawable.ic_map)
             )
+
             userLocationView.accuracyCircle.fillColor = Color.argb(50, 76, 175, 80)
         } catch (e: Exception) {
             Log.e("MapFragment", "Ошибка установки иконки местоположения", e)

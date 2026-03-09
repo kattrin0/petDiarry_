@@ -69,11 +69,11 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginBottom="24dp"
-                android:text="Нажмите, чтобы добавить фото"
+
                 android:textColor="#888888"
                 android:textSize="12sp" />
 
-            <!-- === РЕЖИМ РЕДАКТИРОВАНИЯ (твой оригинальный интерфейс) === -->
+            <!--РЕЖИМ РЕДАКТИРОВАНИЯ -->
             <LinearLayout
                 android:id="@+id/llProfileEditable"
                 android:layout_width="match_parent"
@@ -226,7 +226,7 @@
                         android:id="@+id/etWeight"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:drawableStart="@drawable/ic_weight"
+                        android:drawableStart="@drawable/ic_stub"
                         android:drawablePadding="8dp"
                         android:hint="Вес"
                         android:inputType="numberDecimal"
@@ -261,7 +261,7 @@
                         android:id="@+id/etColor"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:drawableStart="@drawable/ic_color"
+                        android:drawableStart="@drawable/ic_stub"
                         android:drawablePadding="8dp"
                         android:hint="Окрас"
                         android:inputType="text"
@@ -286,7 +286,7 @@
                         android:id="@+id/etChipNumber"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:drawableStart="@drawable/ic_chip"
+                        android:drawableStart="@drawable/ic_stub"
                         android:drawablePadding="8dp"
                         android:hint="Номер чипа (если есть)"
                         android:inputType="number"
@@ -345,7 +345,6 @@
             </LinearLayout>
 
             <!--  РЕЖИМ ПРОСМОТРА  -->
-            <!-- === РЕЖИМ ПРОСМОТРА: текстовый формат "Поле: значение" === -->
             <LinearLayout
                 android:id="@+id/llProfileReadonly"
                 android:layout_width="match_parent"
@@ -429,7 +428,6 @@
                     android:textColor="#555555"
                     android:layout_marginBottom="16dp" />
 
-                <!-- Заметки (отдельный блок с заголовком) -->
                 <LinearLayout
                     android:id="@+id/llReadonlyNotes"
                     android:layout_width="match_parent"

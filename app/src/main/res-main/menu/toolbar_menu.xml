@@ -5,6 +5,8 @@
         android:id="@+id/action_settings"
         android:icon="@drawable/ic_settings"
         android:title="Настройки"
-
-        app:showAsAction="always"/>
+        app:titleTextColor="@color/white"
+        app:itemIconTint="@color/white"
+        app:showAsAction="always"
+        app:titleTextAppearance="@style/textToolbar"/>
 </menu>

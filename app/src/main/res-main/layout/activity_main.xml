@@ -13,22 +13,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.MainActivity"
-    android:fitsSystemWindows="true">
+    >
 
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+
         android:background="@color/greenPrimary"
-        android:minHeight="?attr/actionBarSize"
+
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:titleTextAppearance="@style/textToolbar"
         app:itemIconTint= "@color/white"
-
-        app:title="App"
+        android:fitsSystemWindows="true"
+        android:minHeight="48dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:layout_height="93dp"
         app:menu="@menu/toolbar_menu"/>
 
     <fragment

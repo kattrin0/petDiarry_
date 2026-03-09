@@ -6,9 +6,12 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.petDiary.R
 import com.example.petDiary.ui.SettingsDialog
@@ -28,16 +31,50 @@ class MainActivity : AppCompatActivity() {
 
         toolbar = findViewById(R.id.toolbar)
         bottomNavigationView = findViewById(R.id.bottomNavigationView)
+        val btnNavView = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
 
+        val controller = findNavController(R.id.fragmentContainerView2)
+        btnNavView.setupWithNavController(controller)
         setSupportActionBar(toolbar)
-        supportActionBar?.title = "Pet Diary"
+
+        controller.addOnDestinationChangedListener { _, destination, _ ->
+            // Получаем заголовок из label destination
+            val label = destination.label
+            if (label != null) {
+                toolbar.title = label
+            }
+        }
+        toolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.white))
 
         authViewModel = ViewModelProvider(this)[AuthViewModel::class.java]
-
         observeAuthState()
         handleSignInLink(intent)
     }
 
+//    private fun navigateToHome() {
+//        supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+//        val navHostFragment = NavHostFragment.create(R.navigation.nav_fragment)
+//        supportFragmentManager.beginTransaction()
+//            .replace(R.id.fragmentContainerView2, navHostFragment)
+//            .commit()
+//
+//        supportFragmentManager.executePendingTransactions()
+//
+//        (supportFragmentManager.findFragmentById(R.id.fragmentContainerView2) as? NavHostFragment)
+//            ?.navController
+//            ?.let { navController ->
+//                bottomNavigationView.setupWithNavController(navController)
+//
+//                // Привязываем Toolbar к NavController для автоматической смены заголовка
+//                setupActionBarWithNavController(navController)
+//            }
+//
+//    }
+//
+//    override fun onSupportNavigateUp(): Boolean {
+//        val navController = (supportFragmentManager.findFragmentById(R.id.fragmentContainerView2) as? NavHostFragment)?.navController
+//        return navController?.navigateUp() ?: super.onSupportNavigateUp()
+//    }
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.toolbar_menu, menu)
         return true
@@ -67,7 +104,7 @@ class MainActivity : AppCompatActivity() {
         authViewModel.isAuthenticated.observe(this) { isAuthenticated ->
             if (isAuthenticated) {
                 setAuthBarsVisible(true)
-                navigateToHome()
+                //navigateToHome()
             } else {
                 setAuthBarsVisible(false)
                 navigateToAuth()
@@ -80,17 +117,6 @@ class MainActivity : AppCompatActivity() {
         bottomNavigationView.visibility = if (visible) android.view.View.VISIBLE else android.view.View.GONE
     }
 
-    private fun navigateToHome() {
-        supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-        val navHostFragment = NavHostFragment.create(R.navigation.nav_fragment)
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainerView2, navHostFragment)
-            .commit()
-        supportFragmentManager.executePendingTransactions()
-        (supportFragmentManager.findFragmentById(R.id.fragmentContainerView2) as? NavHostFragment)
-            ?.navController
-            ?.let { bottomNavigationView.setupWithNavController(it) }
-    }
 
     private fun navigateToAuth() {
         supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)

@@ -168,11 +168,72 @@
 
     </androidx.cardview.widget.CardView>
 
+    <!-- Кнопка входа без аккаунта (гостевой режим) -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardGuest"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="20dp"
+            android:gravity="center_vertical"
+            android:background="@android:color/white">
+
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_paw1"
+                app:tint="@color/greenPrimary" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="16dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Войти без аккаунта"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/blackPrimary"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Гостевой режим"
+                    android:textSize="14sp"
+                    android:textColor="@color/grey"/>
+
+            </LinearLayout>
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_chevron_right"
+                app:tint="@color/greenPrimary" />
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:text=""
+        android:text="Все данные в гостевом режиме сохраняются только на этом устройстве"
         android:textSize="12sp"
         android:textColor="@color/grey"
         android:gravity="center"/>

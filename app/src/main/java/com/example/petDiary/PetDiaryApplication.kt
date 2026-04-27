@@ -3,6 +3,7 @@ package com.example.petDiary
 import android.app.Application
 import android.content.pm.PackageManager
 import android.util.Log
+import com.example.petDiary.network.RetrofitClient
 import com.yandex.mapkit.MapKitFactory
 
 class PetDiaryApplication : Application() {
@@ -10,6 +11,7 @@ class PetDiaryApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         initYandexMapKit()
+        RetrofitClient.initialize(this)
     }
 
     private fun initYandexMapKit() {

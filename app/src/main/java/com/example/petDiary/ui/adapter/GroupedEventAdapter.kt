@@ -10,20 +10,15 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.example.petDiary.R
-import com.example.petDiary.domain.model.Event
+import com.example.petDiary.network.models.EventDto
 import java.text.SimpleDateFormat
 import java.util.*
 
-sealed class ListItem {
-    data class DateHeader(val date: String, val dateMillis: Long) : ListItem()
-    data class EventItem(val event: Event) : ListItem()
-}
-
 class GroupedEventAdapter(
     private val context: android.content.Context,
-    private val onEventClick: (Event) -> Unit,
-    private val onEventToggleComplete: (Event) -> Unit,
-    private val onEventDelete: (Event) -> Unit
+    private val onEventClick: (EventDto) -> Unit,
+    private val onEventToggleComplete: (EventDto) -> Unit,
+    private val onEventDelete: (EventDto) -> Unit
 ) : BaseAdapter() {
 
     private var items: List<ListItem> = listOf()
@@ -31,7 +26,8 @@ class GroupedEventAdapter(
     private val VIEW_TYPE_HEADER = 0
     private val VIEW_TYPE_EVENT = 1
 
-    fun updateList(events: List<Event>) {
+    // ← Метод обновления списка
+    fun updateList(events: List<EventDto>) {
         val groupedItems = mutableListOf<ListItem>()
         var lastDate = ""
 
@@ -45,7 +41,7 @@ class GroupedEventAdapter(
         }
 
         items = groupedItems
-        notifyDataSetChanged()
+        notifyDataSetChanged()  // ← Важно! Обновляет ListView
     }
 
     private fun isToday(dateMillis: Long): Boolean {
@@ -82,7 +78,7 @@ class GroupedEventAdapter(
     override fun getItemId(position: Int): Long {
         return when (val item = items[position]) {
             is ListItem.DateHeader -> item.dateMillis
-            is ListItem.EventItem -> item.event.id
+            is ListItem.EventItem -> item.event.id ?: 0L
         }
     }
 
@@ -111,7 +107,6 @@ class GroupedEventAdapter(
 
         tvDateHeader?.text = header.date
 
-        // Меняем иконку в зависимости от дня
         when (header.date) {
             "Сегодня" -> {
                 ivDateIcon?.setImageResource(R.drawable.ic_calendar1)
@@ -130,9 +125,9 @@ class GroupedEventAdapter(
         return view
     }
 
-    private fun getEventView(event: Event, convertView: View?, parent: ViewGroup?): View {
-        val view = convertView?.takeIf { it.findViewById<TextView>(R.id.tvEventTitle) != null }
-            ?: LayoutInflater.from(context).inflate(R.layout.item_event, parent, false)
+    private fun getEventView(event: EventDto, convertView: View?, parent: ViewGroup?): View {
+        val view = convertView ?: LayoutInflater.from(context)
+            .inflate(R.layout.item_event, parent, false)
 
         val tvEventTitle = view.findViewById<TextView>(R.id.tvEventTitle)
         val tvEventDate = view.findViewById<TextView>(R.id.tvEventDate)
@@ -141,7 +136,7 @@ class GroupedEventAdapter(
         val checkboxComplete = view.findViewById<CheckBox>(R.id.checkboxComplete)
         val btnDelete = view.findViewById<ImageButton>(R.id.btnDelete)
 
-        tvEventTitle?.text = event.title ?: ""
+        tvEventTitle?.text = event.title
         tvEventDate?.visibility = View.GONE
 
         val timeValue = event.time ?: ""
@@ -166,14 +161,14 @@ class GroupedEventAdapter(
 
         if (checkboxComplete != null) {
             checkboxComplete.setOnCheckedChangeListener(null)
-            checkboxComplete.isChecked = event.isCompleted
+            checkboxComplete.isChecked = event.completed
             checkboxComplete.setOnCheckedChangeListener { _, _ ->
                 onEventToggleComplete(event)
             }
         }
 
         if (tvEventTitle != null) {
-            if (event.isCompleted) {
+            if (event.completed) {
                 tvEventTitle.paintFlags = tvEventTitle.paintFlags or android.graphics.Paint.STRIKE_THRU_TEXT_FLAG
                 tvEventTitle.alpha = 0.5f
             } else {
@@ -194,3 +189,7 @@ class GroupedEventAdapter(
     }
 }
 
+sealed class ListItem {
+    data class DateHeader(val date: String, val dateMillis: Long) : ListItem()
+    data class EventItem(val event: EventDto) : ListItem()
+}

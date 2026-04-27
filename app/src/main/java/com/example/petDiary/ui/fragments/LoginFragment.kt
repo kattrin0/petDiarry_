@@ -11,18 +11,14 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.example.petDiary.R
 import com.example.petDiary.ui.viewmodel.AuthViewModel
 import com.google.android.material.textfield.TextInputLayout
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.auth.ktx.actionCodeSettings
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
 class LoginFragment : Fragment() {
 
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private lateinit var authViewModel: AuthViewModel
 
     private lateinit var tvTitle: TextView
@@ -34,7 +30,7 @@ class LoginFragment : Fragment() {
     private lateinit var passwordLayout: TextInputLayout
     private lateinit var btnAction: Button
 
-    private var authMode = "register" // "register" или "login"
+    private var authMode = "register"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,6 +55,9 @@ class LoginFragment : Fragment() {
         initViews(view)
         setupUI()
         setupClickListeners()
+
+        // ← Наблюдаем за состоянием аутентификации
+        observeAuthState()
     }
 
     private fun initViews(view: View) {
@@ -74,125 +73,88 @@ class LoginFragment : Fragment() {
 
     private fun setupUI() {
         if (authMode == "login") {
-            // Режим входа (email + пароль)
             tvTitle.text = "Вход"
             tvSubtitle.text = "Введите email и пароль"
             passwordLayout.visibility = View.VISIBLE
             btnAction.text = "Войти"
         } else {
-            // Режим регистрации (только email для ссылки)
             tvTitle.text = "Регистрация"
-            tvSubtitle.text = "Введите email для отправки ссылки"
-            passwordLayout.visibility = View.GONE
-            btnAction.text = "Отправить ссылку"
+            tvSubtitle.text = "Введите email и пароль"
+            passwordLayout.visibility = View.VISIBLE
+            btnAction.text = "Зарегистрироваться"
         }
     }
 
     private fun setupClickListeners() {
         btnBack.setOnClickListener {
-            // Возвращаемся к выбору
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView2, AuthChoiceFragment.newInstance())
-                .commit()
+            findNavController().popBackStack()
         }
 
         btnAction.setOnClickListener {
             val email = etEmail.text.toString().trim()
+            val password = etPassword.text.toString().trim()
 
             if (email.isEmpty()) {
                 Toast.makeText(requireContext(), "Введите email", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
+            if (password.isEmpty()) {
+                Toast.makeText(requireContext(), "Введите пароль", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             if (authMode == "login") {
-                // Вход с паролем
-                val password = etPassword.text.toString().trim()
-                if (password.isEmpty()) {
-                    Toast.makeText(requireContext(), "Введите пароль", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
-                }
-                loginWithEmail(email, password)
+                login(email, password)
             } else {
-                // Регистрация - отправка ссылки
-                sendSignInLink(email)
+                register(email, password)
             }
         }
     }
 
-    private fun loginWithEmail(email: String, password: String) {
+    private fun observeAuthState() {
+        // ← Наблюдаем за авторизацией
+        authViewModel.isAuthenticated.observe(viewLifecycleOwner) { isAuthenticated ->
+            if (isAuthenticated) {
+                findNavController().popBackStack(R.id.authChoiceFragment, true)
+            }
+        }
+
+        // ← Наблюдаем за гостевым режимом
+        authViewModel.isGuest.observe(viewLifecycleOwner) { isGuest ->
+            if (isGuest) {
+                findNavController().popBackStack(R.id.authChoiceFragment, true)
+            }
+        }
+
+        // ← Наблюдаем за ошибками
+        authViewModel.error.observe(viewLifecycleOwner) { errorMessage ->
+            errorMessage?.let {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
+                authViewModel.clearError()
+            }
+        }
+    }
+
+    private fun register(email: String, password: String) {
+        btnAction.isEnabled = false
+        btnAction.text = "Регистрация..."
+
+        authViewModel.register(email, password)
+
+        // Возвращаем кнопку в исходное состояние (успех или ошибка будет через observe)
+        btnAction.isEnabled = true
+        btnAction.text = if (authMode == "login") "Войти" else "Зарегистрироваться"
+    }
+
+    private fun login(email: String, password: String) {
         btnAction.isEnabled = false
         btnAction.text = "Вход..."
 
-        lifecycleScope.launch {
-            try {
-                auth.signInWithEmailAndPassword(email, password).await()
+        authViewModel.login(email, password)
 
-                Toast.makeText(
-                    requireContext(),
-                    "Вход выполнен успешно!",
-                    Toast.LENGTH_SHORT
-                ).show()
-
-                // Обновляем состояние авторизации — MainActivity через observer заменит экран на HomeFragment
-                authViewModel.checkAuthState()
-
-            } catch (e: Exception) {
-                Toast.makeText(
-                    requireContext(),
-                    "Ошибка входа: ${e.message}",
-                    Toast.LENGTH_SHORT
-                ).show()
-            } finally {
-                btnAction.isEnabled = true
-                btnAction.text = "Войти"
-            }
-        }
-    }
-
-    private fun sendSignInLink(email: String) {
-        btnAction.isEnabled = false
-        btnAction.text = "Отправка..."
-
-        val actionCodeSettings = actionCodeSettings {
-            url = "https://petdiary-d6042.firebaseapp.com"
-            handleCodeInApp = true
-            setAndroidPackageName("com.example.petDiary", true, "1")
-        }
-
-        lifecycleScope.launch {
-            try {
-                auth.sendSignInLinkToEmail(email, actionCodeSettings).await()
-                saveEmailToPrefs(email)
-
-                Toast.makeText(
-                    requireContext(),
-                    "Ссылка для входа отправлена на $email",
-                    Toast.LENGTH_LONG
-                ).show()
-
-                // Возвращаемся к выбору
-                parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragmentContainerView2, AuthChoiceFragment.newInstance())
-                    .commit()
-
-            } catch (e: Exception) {
-                Toast.makeText(
-                    requireContext(),
-                    "Ошибка: ${e.message}",
-                    Toast.LENGTH_SHORT
-                ).show()
-            } finally {
-                btnAction.isEnabled = true
-                btnAction.text = "Отправить ссылку"
-            }
-        }
-    }
-
-    private fun saveEmailToPrefs(email: String) {
-        requireContext().getSharedPreferences("auth_prefs", android.content.Context.MODE_PRIVATE)
-            .edit()
-            .putString("email_for_signin", email)
-            .apply()
+        btnAction.isEnabled = true
+        btnAction.text = if (authMode == "login") "Войти" else "Зарегистрироваться"
     }
 
     companion object {

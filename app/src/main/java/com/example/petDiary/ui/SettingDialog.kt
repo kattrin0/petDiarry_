@@ -20,10 +20,23 @@ class SettingsDialog : DialogFragment() {
         mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
 
         val builder = AlertDialog.Builder(requireContext())
-        val items = arrayOf("Светлая тема", "Темная тема", "Системная тема", "Выйти из аккаунта")
+
+        val items = mutableListOf("Светлая тема", "Темная тема", "Системная тема")
+
+        authViewModel.isGuest.observe(this) { isGuest ->
+            if (isGuest) {
+                items.add("Выйти (гостевой режим)")
+            } else {
+                items.add("Выйти из аккаунта")
+            }
+        }
+
+         if (items.size == 3) {
+            items.add("Выйти из аккаунта")
+        }
 
         builder.setTitle("Настройки")
-            .setItems(items) { _, which ->
+            .setItems(items.toTypedArray()) { _, which ->
                 when (which) {
                     0 -> mainViewModel.saveThemeMode(AppCompatDelegate.MODE_NIGHT_NO)
                     1 -> mainViewModel.saveThemeMode(AppCompatDelegate.MODE_NIGHT_YES)
@@ -37,7 +50,7 @@ class SettingsDialog : DialogFragment() {
 
     private fun showLogoutConfirmation() {
         AlertDialog.Builder(requireContext())
-            .setTitle("Выход из аккаунта")
+            .setTitle("Выход")
             .setMessage("Вы уверены, что хотите выйти?")
             .setPositiveButton("Да") { _, _ ->
                 authViewModel.signOut()

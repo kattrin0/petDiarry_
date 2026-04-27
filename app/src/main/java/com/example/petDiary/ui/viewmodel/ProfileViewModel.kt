@@ -5,26 +5,16 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.petDiary.data.repository.FirestorePetProfileRepository
-import com.example.petDiary.data.repository.LocalPetProfileRepository
-import com.example.petDiary.data.repository.PhotoRepository
-import com.example.petDiary.domain.model.PetProfile
-import com.example.petDiary.domain.repository.IPetProfileRepository
-import com.google.firebase.auth.FirebaseAuth
+import com.example.petDiary.network.RetrofitClient
+import com.example.petDiary.network.models.PetProfileDto
 import kotlinx.coroutines.launch
 
 class ProfileViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository: IPetProfileRepository = if (FirebaseAuth.getInstance().currentUser != null) {
-        FirestorePetProfileRepository()
-    } else {
-        LocalPetProfileRepository(application)
-    }
 
-    private val photoRepository = PhotoRepository(application)
-    private val isAuthorized = FirebaseAuth.getInstance().currentUser != null
+    private val api = RetrofitClient.apiService
 
-    private val _petProfile = MutableLiveData<PetProfile>()
-    val petProfile: LiveData<PetProfile> = _petProfile
+    private val _petProfile = MutableLiveData<PetProfileDto>()
+    val petProfile: LiveData<PetProfileDto> = _petProfile
 
     private val _hasSavedData = MutableLiveData<Boolean>()
     val hasSavedData: LiveData<Boolean> = _hasSavedData
@@ -39,10 +29,15 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val profile = repository.getPetProfile()
-                _petProfile.value = profile ?: PetProfile()
-                _hasSavedData.value = profile != null
-                _error.value = null
+                val response = api.getProfile()
+                if (response.isSuccessful) {
+                    val profile = response.body()
+                    _petProfile.value = profile ?: PetProfileDto()
+                    _hasSavedData.value = profile != null
+                } else {
+                    _petProfile.value = PetProfileDto()
+                    _hasSavedData.value = false
+                }
             } catch (e: Exception) {
                 _error.value = "Ошибка загрузки: ${e.message}"
             } finally {
@@ -51,24 +46,27 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun savePetProfile(profile: PetProfile, photoLocalPath: String? = null) {
+    fun savePetProfile(profile: PetProfileDto, photoLocalPath: String? = null) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
                 var finalProfile = profile
 
                 if (photoLocalPath != null) {
-                    val photoUrl = photoRepository.savePhoto(photoLocalPath, isAuthorized)
-                    finalProfile = profile.copy(photoPath = photoUrl)
-
+                    // TODO: Загрузка фото на сервер
+                    // finalProfile = profile.copy(photoPath = uploadedUrl)
                 }
 
-                repository.savePetProfile(finalProfile)
-                _petProfile.value = finalProfile
-                _hasSavedData.value = true
-                _error.value = null
+                val response = api.saveProfile(finalProfile)
+                if (response.isSuccessful) {
+                    _petProfile.value = response.body()
+                    _hasSavedData.value = true
+                    _error.value = "Профиль сохранён!"
+                } else {
+                    _error.value = response.errorBody()?.string() ?: "Ошибка сохранения"
+                }
             } catch (e: Exception) {
-                _error.value = "Ошибка сохранения: ${e.message}"
+                _error.value = "Ошибка: ${e.message}"
             } finally {
                 _isLoading.value = false
             }

@@ -7,15 +7,14 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavController
+import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.petDiary.R
-import com.example.petDiary.ui.SettingsDialog
-import com.example.petDiary.ui.fragments.AuthChoiceFragment
 import com.example.petDiary.ui.viewmodel.AuthViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
@@ -24,6 +23,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var authViewModel: AuthViewModel
     private lateinit var toolbar: Toolbar
     private lateinit var bottomNavigationView: BottomNavigationView
+    private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,50 +31,37 @@ class MainActivity : AppCompatActivity() {
 
         toolbar = findViewById(R.id.toolbar)
         bottomNavigationView = findViewById(R.id.bottomNavigationView)
-        val btnNavView = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
 
-        val controller = findNavController(R.id.fragmentContainerView2)
-        btnNavView.setupWithNavController(controller)
         setSupportActionBar(toolbar)
+        toolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.white))
 
-        controller.addOnDestinationChangedListener { _, destination, _ ->
-            // Получаем заголовок из label destination
+        // Инициализируем NavController
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.fragmentContainerView2) as NavHostFragment
+        navController = navHostFragment.navController
+
+        // Связываем BottomNavigationView с NavController
+        bottomNavigationView.setupWithNavController(navController)
+
+        // Настраиваем ActionBar с NavController
+        setupActionBarWithNavController(navController)
+
+        navController.addOnDestinationChangedListener { _, destination, _ ->
             val label = destination.label
             if (label != null) {
                 toolbar.title = label
             }
         }
-        toolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.white))
 
         authViewModel = ViewModelProvider(this)[AuthViewModel::class.java]
         observeAuthState()
-        handleSignInLink(intent)
+
     }
 
-//    private fun navigateToHome() {
-//        supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-//        val navHostFragment = NavHostFragment.create(R.navigation.nav_fragment)
-//        supportFragmentManager.beginTransaction()
-//            .replace(R.id.fragmentContainerView2, navHostFragment)
-//            .commit()
-//
-//        supportFragmentManager.executePendingTransactions()
-//
-//        (supportFragmentManager.findFragmentById(R.id.fragmentContainerView2) as? NavHostFragment)
-//            ?.navController
-//            ?.let { navController ->
-//                bottomNavigationView.setupWithNavController(navController)
-//
-//                // Привязываем Toolbar к NavController для автоматической смены заголовка
-//                setupActionBarWithNavController(navController)
-//            }
-//
-//    }
-//
-//    override fun onSupportNavigateUp(): Boolean {
-//        val navController = (supportFragmentManager.findFragmentById(R.id.fragmentContainerView2) as? NavHostFragment)?.navController
-//        return navController?.navigateUp() ?: super.onSupportNavigateUp()
-//    }
+    override fun onSupportNavigateUp(): Boolean {
+        return navController.navigateUp() || super.onSupportNavigateUp()
+    }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.toolbar_menu, menu)
         return true
@@ -97,37 +84,66 @@ class MainActivity : AppCompatActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        handleSignInLink(intent)
     }
 
     private fun observeAuthState() {
+        // Наблюдаем за состоянием аутентификации
         authViewModel.isAuthenticated.observe(this) { isAuthenticated ->
             if (isAuthenticated) {
-                setAuthBarsVisible(true)
-                //navigateToHome()
+                navigateToHome()
             } else {
-                setAuthBarsVisible(false)
-                navigateToAuth()
+                // Проверяем гостевой режим
+                authViewModel.isGuest.observe(this) { isGuest ->
+                    if (isGuest) {
+                        navigateToHome()
+                    } else {
+                        navigateToAuth()
+                    }
+                }
+            }
+        }
+
+        // Если гость уже залогинен при запуске
+        authViewModel.isGuest.observe(this) { isGuest ->
+            if (isGuest) {
+                navigateToHome()
             }
         }
     }
 
-    private fun setAuthBarsVisible(visible: Boolean) {
-        toolbar.visibility = if (visible) android.view.View.VISIBLE else android.view.View.GONE
-        bottomNavigationView.visibility = if (visible) android.view.View.VISIBLE else android.view.View.GONE
-    }
+    private fun navigateToHome() {
+        // Показываем тулбар и нижнюю навигацию
+        toolbar.visibility = android.view.View.VISIBLE
+        bottomNavigationView.visibility = android.view.View.VISIBLE
 
+        // Проверяем, не находимся ли мы уже на home
+        if (navController.currentDestination?.id != R.id.homeFragment) {
+            // Создаем NavOptions для очистки back stack
+            val navOptions = NavOptions.Builder()
+                .setPopUpTo(R.id.authChoiceFragment, true)
+                .build()
 
-    private fun navigateToAuth() {
-        supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainerView2, AuthChoiceFragment.newInstance())
-            .commit()
-    }
-
-    private fun handleSignInLink(intent: Intent?) {
-        intent?.data?.toString()?.let { link ->
-            authViewModel.handleSignInLink(link)
+            // Переходим на homeFragment
+            navController.navigate(R.id.homeFragment, null, navOptions)
         }
     }
+
+    private fun navigateToAuth() {
+        // Скрываем тулбар и нижнюю навигацию
+        toolbar.visibility = android.view.View.GONE
+        bottomNavigationView.visibility = android.view.View.GONE
+
+        // Проверяем, не находимся ли мы уже на auth
+        if (navController.currentDestination?.id != R.id.authChoiceFragment) {
+            // Создаем NavOptions для очистки back stack
+            val navOptions = NavOptions.Builder()
+                .setPopUpTo(R.id.homeFragment, true)
+                .build()
+
+            // Переходим на экран авторизации
+            navController.navigate(R.id.authChoiceFragment, null, navOptions)
+        }
+    }
+
+
 }

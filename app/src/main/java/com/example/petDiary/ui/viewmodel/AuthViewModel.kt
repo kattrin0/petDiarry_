@@ -5,17 +5,15 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.auth.ktx.actionCodeSettings
-import com.google.firebase.ktx.Firebase
+import com.example.petDiary.network.RetrofitClient
+import com.example.petDiary.network.TokenManager
+import com.example.petDiary.network.models.AuthRequest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val auth: FirebaseAuth = Firebase.auth
-    private val prefs = application.getSharedPreferences("auth_prefs", android.content.Context.MODE_PRIVATE)
+    private val api = RetrofitClient.apiService
+    private val tokenManager = com.example.petDiary.network.TokenManager(application)
 
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
@@ -26,31 +24,34 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     private val _isAuthenticated = MutableLiveData<Boolean>()
     val isAuthenticated: LiveData<Boolean> = _isAuthenticated
 
+    private val _isGuest = MutableLiveData<Boolean>()
+    val isGuest: LiveData<Boolean> = _isGuest
+
     init {
-        checkAuthState()
+        // Проверяем, есть ли сохранённый токен
+        val token = tokenManager.getToken()
+        if (token != null) {
+            _isAuthenticated.value = true
+        }
     }
 
-    fun checkAuthState() {
-        _isAuthenticated.value = auth.currentUser != null
-    }
-
-    fun sendSignInLink(email: String) {
+    fun register(email: String, password: String) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val actionCodeSettings = actionCodeSettings {
-                    url = "https://petdiary-d6042.firebaseapp.com"
-                    handleCodeInApp = true
-                    setAndroidPackageName("com.example.petDiary", true, "1")
+                val request = AuthRequest(email, password, false)
+                val response = api.register(request)
+
+                if (response.isSuccessful) {
+                    val authResponse = response.body()!!
+                    tokenManager.saveToken(authResponse.token)
+                    tokenManager.saveUserId(authResponse.userId)
+                    _isAuthenticated.value = true
+                    _isGuest.value = false
+                    _error.value = "Регистрация успешна!"
+                } else {
+                    _error.value = response.errorBody()?.string() ?: "Ошибка регистрации"
                 }
-
-                auth.sendSignInLinkToEmail(email, actionCodeSettings).await()
-
-                // Сохраняем email
-                prefs.edit().putString("email_for_signin", email).apply()
-
-                _error.value = "Ссылка отправлена на $email"
-
             } catch (e: Exception) {
                 _error.value = "Ошибка: ${e.message}"
             } finally {
@@ -59,24 +60,49 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun handleSignInLink(link: String) {
+    fun login(email: String, password: String) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                if (auth.isSignInWithEmailLink(link)) {
-                    val email = prefs.getString("email_for_signin", null)
-                    if (email != null) {
-                        auth.signInWithEmailLink(email, link).await()
-                        _isAuthenticated.postValue(auth.currentUser != null)
-                        _error.value = "Вход выполнен успешно!"
-                    } else {
-                        _error.value = "Email не найден"
-                    }
+                val request = AuthRequest(email, password, false)
+                val response = api.login(request)
+
+                if (response.isSuccessful) {
+                    val authResponse = response.body()!!
+                    tokenManager.saveToken(authResponse.token)
+                    tokenManager.saveUserId(authResponse.userId)
+                    _isAuthenticated.value = true
+                    _isGuest.value = false
+                    _error.value = "Вход выполнен!"
                 } else {
-                    _error.value = "Неверная ссылка"
+                    _error.value = response.errorBody()?.string() ?: "Ошибка входа"
                 }
             } catch (e: Exception) {
-                _error.value = "Ошибка входа: ${e.message}"
+                _error.value = "Ошибка: ${e.message}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun signInAsGuest() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val response = api.guestLogin()
+
+                if (response.isSuccessful) {
+                    val authResponse = response.body()!!
+                    tokenManager.saveToken(authResponse.token)
+                    tokenManager.saveUserId(authResponse.userId)
+                    _isGuest.value = true
+                    _isAuthenticated.value = false
+                    _error.value = "Гостевой режим"
+                } else {
+                    _error.value = "Ошибка входа как гость"
+                }
+            } catch (e: Exception) {
+                _error.value = "Ошибка: ${e.message}"
             } finally {
                 _isLoading.value = false
             }
@@ -84,19 +110,10 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun signOut() {
-        viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                auth.signOut()
-                checkAuthState()
-                prefs.edit().remove("email_for_signin").apply()
-                _error.value = "Вы вышли из аккаунта"
-            } catch (e: Exception) {
-                _error.value = "Ошибка при выходе: ${e.message}"
-            } finally {
-                _isLoading.value = false
-            }
-        }
+        tokenManager.clear()
+        _isAuthenticated.value = false
+        _isGuest.value = false
+        _error.value = "Вы вышли из аккаунта"
     }
 
     fun clearError() {

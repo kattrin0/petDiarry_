@@ -16,8 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.Observer
 import com.example.petDiary.R
-
-import com.example.petDiary.domain.model.Event
+import com.example.petDiary.network.models.EventDto  // ← Импортируем DTO
 import com.example.petDiary.ui.adapter.GroupedEventAdapter
 import com.example.petDiary.ui.viewmodel.CalendarViewModel
 import com.google.android.material.textfield.TextInputEditText
@@ -58,6 +57,7 @@ class CalendarFragment : Fragment() {
         setupObservers()
         setupAdapter()
         setupClickListeners()
+
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
             // Можно показать/скрыть ProgressBar
         }
@@ -115,7 +115,8 @@ class CalendarFragment : Fragment() {
         }
     }
 
-    private fun updateEventsList(events: List<Event>) {
+    // ← Используем EventDto
+    private fun updateEventsList(events: List<EventDto>) {
         adapter.updateList(events)
 
         if (events.isEmpty()) {
@@ -127,13 +128,15 @@ class CalendarFragment : Fragment() {
         }
     }
 
-    private fun toggleEventComplete(event: Event) {
+    // ← Используем EventDto
+    private fun toggleEventComplete(event: EventDto) {
         viewModel.toggleEventComplete(event)
-        val message = if (event.isCompleted) "Отмечено как невыполненное" else "Выполнено!"
+        val message = if (event.completed) "Отмечено как невыполненное" else "Выполнено!"
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 
-    private fun deleteEvent(event: Event) {
+    // ← Используем EventDto
+    private fun deleteEvent(event: EventDto) {
         AlertDialog.Builder(requireContext())
             .setTitle("Удалить?")
             .setMessage("Удалить \"${event.title}\"?")
@@ -145,7 +148,8 @@ class CalendarFragment : Fragment() {
             .show()
     }
 
-    private fun showEventDetails(event: Event) {
+    // ← Используем EventDto
+    private fun showEventDetails(event: EventDto) {
         val message = buildString {
             append("📅 ${event.date}")
             val time = event.time ?: ""
@@ -156,14 +160,14 @@ class CalendarFragment : Fragment() {
             if (desc.isNotEmpty()) {
                 append("\n\n📝 $desc")
             }
-            append("\n\nСтатус: ${if (event.isCompleted) "✅ Выполнено" else "⏳ Ожидает"}")
+            append("\n\nСтатус: ${if (event.completed) "✅ Выполнено" else "⏳ Ожидает"}")
         }
 
         AlertDialog.Builder(requireContext())
             .setTitle(event.title)
             .setMessage(message)
             .setPositiveButton("Закрыть", null)
-            .setNeutralButton(if (event.isCompleted) "Отменить выполнение" else "Отметить выполненным") { _, _ ->
+            .setNeutralButton(if (event.completed) "Отменить выполнение" else "Отметить выполненным") { _, _ ->
                 toggleEventComplete(event)
             }
             .show()
@@ -198,7 +202,7 @@ class CalendarFragment : Fragment() {
 
         calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
             val cal = Calendar.getInstance().apply {
-                set(year, month, dayOfMonth, 0, 0, 0)  // Обнуляем время
+                set(year, month, dayOfMonth, 0, 0, 0)
                 set(Calendar.MILLISECOND, 0)
             }
             selectedDateMillis = cal.timeInMillis
@@ -232,7 +236,8 @@ class CalendarFragment : Fragment() {
                         String.format("%02d:%02d", selectedHour, selectedMinute)
                     } else ""
 
-                    val event = Event(
+                    // ← Используем EventDto
+                    val event = EventDto(
                         title = title,
                         description = description,
                         date = selectedDateString,
@@ -240,7 +245,7 @@ class CalendarFragment : Fragment() {
                         dateMillis = selectedDateMillis,
                         timeHour = selectedHour,
                         timeMinute = selectedMinute,
-                        isCompleted = false
+                        completed = false
                     )
                     viewModel.addEvent(event)
                     Toast.makeText(context, "Событие добавлено!", Toast.LENGTH_SHORT).show()
@@ -267,4 +272,3 @@ class CalendarFragment : Fragment() {
         fun newInstance() = CalendarFragment()
     }
 }
-

@@ -6,13 +6,17 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.petDiary.R
+import com.example.petDiary.ui.viewmodel.AuthViewModel
 
 class AuthChoiceFragment : Fragment() {
 
     private lateinit var cardRegister: CardView
     private lateinit var cardLogin: CardView
+    private lateinit var cardGuest: CardView
+    private lateinit var authViewModel: AuthViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -25,33 +29,29 @@ class AuthChoiceFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        authViewModel = ViewModelProvider(requireActivity())[AuthViewModel::class.java]
+
         cardRegister = view.findViewById(R.id.cardRegister)
         cardLogin = view.findViewById(R.id.cardLogin)
+        cardGuest = view.findViewById(R.id.cardGuest)
 
         cardRegister.setOnClickListener {
-            // Регистрация (новый пользователь) - только email
-            openLoginFragment("register")
+            val bundle = Bundle().apply {
+                putString("auth_mode", "register")
+            }
+            findNavController().navigate(R.id.loginFragment, bundle)
         }
 
         cardLogin.setOnClickListener {
-            // Вход (существующий пользователь) - email + пароль
-            openLoginFragment("login")
-        }
-    }
-
-    private fun openLoginFragment(mode: String) {
-        // Передаем режим в LoginFragment через Bundle
-        val bundle = Bundle().apply {
-            putString("auth_mode", mode)
+            val bundle = Bundle().apply {
+                putString("auth_mode", "login")
+            }
+            findNavController().navigate(R.id.loginFragment, bundle)
         }
 
-        // Используем Navigation Component для перехода
-        // Если у вас нет Navigation Graph, используйте replace
-        val loginFragment = LoginFragment.newInstance(mode)
-        parentFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainerView2, loginFragment)
-            .addToBackStack(null)
-            .commit()
+        cardGuest.setOnClickListener {
+            authViewModel.signInAsGuest()
+        }
     }
 
     companion object {

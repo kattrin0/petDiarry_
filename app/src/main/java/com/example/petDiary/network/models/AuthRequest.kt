@@ -1,4 +1,7 @@
 package com.example.petDiary.network.models
 
-class AuthRequest {
-}
+data class AuthRequest(
+    val email: String,
+    val password: String,
+    val guest: Boolean = false
+)

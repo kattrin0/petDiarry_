@@ -18,8 +18,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.Observer
 import com.example.petDiary.R
-
-import com.example.petDiary.domain.model.PetProfile
+import com.example.petDiary.network.models.PetProfileDto  // ← Импортируем DTO
 import com.example.petDiary.ui.viewmodel.ProfileViewModel
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -34,7 +33,7 @@ import java.util.*
 
 class ProfileFragment : Fragment() {
 
-    // === UI: редактируемые элементы ===
+    // UI элементы
     private lateinit var ivPetPhoto: ImageView
     private lateinit var ivPlaceholder: ImageView
     private lateinit var tvAddPhoto: TextView
@@ -51,7 +50,7 @@ class ProfileFragment : Fragment() {
     private lateinit var etNotes: TextInputEditText
     private lateinit var btnSave: MaterialButton
 
-    // === UI: статичные элементы (режим просмотра) ===
+    // Режим просмотра
     private lateinit var llProfileEditable: LinearLayout
     private lateinit var llProfileReadonly: LinearLayout
     private lateinit var btnEdit: MaterialButton
@@ -78,7 +77,6 @@ class ProfileFragment : Fragment() {
         "Шпиц", "Чихуахуа", "Корги", "Мопс", "Шелти", "Акита-ину", "Метис", "Другая"
     )
 
-    // Лончеры
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let { saveImageToInternalStorage(it) }
     }
@@ -155,8 +153,11 @@ class ProfileFragment : Fragment() {
     }
 
     private fun setupObservers() {
-        viewModel.petProfile.observe(viewLifecycleOwner, Observer { profile ->
-            updateProfileUI(profile)
+        // ← Используем PetProfileDto
+        viewModel.petProfile.observe(viewLifecycleOwner, Observer { profile: PetProfileDto? ->
+            if (profile != null) {
+                updateProfileUI(profile)
+            }
         })
 
         viewModel.hasSavedData.observe(viewLifecycleOwner, Observer { hasData ->
@@ -175,14 +176,25 @@ class ProfileFragment : Fragment() {
         })
     }
 
-    private fun updateProfileUI(profile: PetProfile) {
+    // ← Используем PetProfileDto
+    private fun updateProfileUI(profile: PetProfileDto) {
         etPetName.setText(profile.name)
         actvBreed.setText(profile.breed, false)
         etBirthDate.setText(profile.birthDate)
-        etWeight.setText(profile.weight)
+
+        // Вес теперь Double -> преобразуем в строку
+        val weightStr = if (profile.weight > 0) {
+            if (profile.weight % 1 == 0.0) {
+                profile.weight.toInt().toString()
+            } else {
+                profile.weight.toString()
+            }
+        } else ""
+        etWeight.setText(weightStr)
+
         etColor.setText(profile.color)
         etChipNumber.setText(profile.chipNumber)
-        switchSterilized.isChecked = profile.isSterilized
+        switchSterilized.isChecked = profile.sterilized
         etNotes.setText(profile.notes)
 
         when (profile.gender) {
@@ -205,7 +217,10 @@ class ProfileFragment : Fragment() {
             else -> ""
         }
         val birthDate = etBirthDate.text?.toString()?.trim() ?: ""
-        val weight = etWeight.text?.toString()?.trim() ?: ""
+
+        val weightText = etWeight.text?.toString()?.trim() ?: ""
+        val weight = weightText.toDoubleOrNull() ?: 0.0
+
         val color = etColor.text?.toString()?.trim() ?: ""
         val chip = etChipNumber.text?.toString()?.trim() ?: ""
         val sterilized = switchSterilized.isChecked
@@ -216,7 +231,8 @@ class ProfileFragment : Fragment() {
             return
         }
 
-        val profile = PetProfile(
+        // ← Используем PetProfileDto
+        val profile = PetProfileDto(
             name = name,
             breed = breed,
             gender = gender,
@@ -224,7 +240,7 @@ class ProfileFragment : Fragment() {
             weight = weight,
             color = color,
             chipNumber = chip,
-            isSterilized = sterilized,
+            sterilized = sterilized,
             notes = notes,
             photoPath = savedPhotoPath
         )
@@ -335,8 +351,10 @@ class ProfileFragment : Fragment() {
         }
     }
 
+    // ← Исправленный метод с PetProfileDto
     private fun updateReadonlyView() {
         val profile = viewModel.petProfile.value ?: return
+
         val name = profile.name
         val breed = profile.breed
         val gender = when (profile.gender) {
@@ -345,17 +363,24 @@ class ProfileFragment : Fragment() {
             else -> "—"
         }
         val birthDateStr = profile.birthDate
-        val weight = profile.weight.ifEmpty { "—" }
+        val weight = if (profile.weight > 0) {
+            if (profile.weight % 1 == 0.0) {
+                "${profile.weight.toInt()} кг"
+            } else {
+                "${profile.weight} кг"
+            }
+        } else "—"
+
         val color = profile.color
         val chip = profile.chipNumber
-        val sterilized = if (profile.isSterilized) "Да" else "Нет"
+        val sterilized = if (profile.sterilized) "Да" else "Нет"
         val notes = profile.notes.takeIf { it.isNotBlank() }
 
         tvReadonlyName.text = if (name.isNotEmpty()) "Имя: $name" else "Имя: —"
         tvReadonlyBreed.text = if (breed.isNotEmpty()) "Порода: $breed" else "Порода: —"
         tvReadonlyGender.text = "Пол: $gender"
         tvReadonlySterilized.text = "Стерилизация: $sterilized"
-        tvReadonlyWeight.text = "Вес: ${if (weight == "—") "—" else "$weight кг"}"
+        tvReadonlyWeight.text = "Вес: $weight"
         tvReadonlyColor.text = if (color.isNotEmpty()) "Окрас: $color" else "Окрас: —"
 
         val birthText = if (birthDateStr.isNotEmpty()) {
@@ -423,4 +448,3 @@ class ProfileFragment : Fragment() {
         fun newInstance() = ProfileFragment()
     }
 }
-

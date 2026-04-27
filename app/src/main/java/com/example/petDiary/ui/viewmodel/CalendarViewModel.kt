@@ -5,17 +5,18 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.petDiary.data.repository.EventsRepository
-import com.example.petDiary.data.service.NotificationService
-import com.example.petDiary.domain.model.Event
+import com.example.petDiary.network.RetrofitClient
+import com.example.petDiary.network.models.EventDto
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
 class CalendarViewModel(application: Application) : AndroidViewModel(application) {
-    private val eventsRepository = EventsRepository(application)
-    private val notificationService = NotificationService(application)
 
-    private val _events = MutableLiveData<List<Event>>()
-    val events: LiveData<List<Event>> = _events
+    private val api = RetrofitClient.apiService
+
+    private val _events = MutableLiveData<List<EventDto>>()
+    val events: LiveData<List<EventDto>> = _events
 
     private val _todayDate = MutableLiveData<String>()
     val todayDate: LiveData<String> = _todayDate
@@ -27,14 +28,13 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
     val error: LiveData<String?> = _error
 
     init {
-        notificationService.createNotificationChannel()
         loadTodayDate()
         refreshEvents()
     }
 
     private fun loadTodayDate() {
-        val dateFormat = java.text.SimpleDateFormat("d MMMM yyyy", java.util.Locale("ru"))
-        val today = dateFormat.format(java.util.Date())
+        val dateFormat = SimpleDateFormat("d MMMM yyyy", Locale("ru"))
+        val today = dateFormat.format(Date())
         _todayDate.value = "Сегодня: $today"
     }
 
@@ -42,74 +42,92 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                eventsRepository.removePassedEvents()
-                val activeEvents = eventsRepository.getActiveEvents()
-                _events.value = activeEvents
-                _error.value = null
-            } catch (e: Exception) {
-                _error.value = "Ошибка загрузки событий: ${e.message}"
-                e.printStackTrace()
-            } finally {
-                _isLoading.value = false
-            }
-        }
-    }
-
-    fun addEvent(event: Event) {
-        viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                eventsRepository.addEvent(event)
-                if (event.time?.isNotEmpty() == true && event.timeHour > 0) {
-                    notificationService.scheduleNotification(event)
+                val response = api.getActiveEvents()
+                if (response.isSuccessful) {
+                    _events.value = response.body() ?: emptyList()
+                } else {
+                    _error.value = "Ошибка загрузки: ${response.errorBody()?.string()}"
                 }
-                refreshEvents()
-                _error.value = null
             } catch (e: Exception) {
-                _error.value = "Ошибка добавления события: ${e.message}"
-                e.printStackTrace()
+                _error.value = "Ошибка: ${e.message}"
             } finally {
                 _isLoading.value = false
             }
         }
     }
 
-    fun updateEvent(event: Event) {
+    fun addEvent(event: EventDto) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                eventsRepository.updateEvent(event)
-                refreshEvents()
-                _error.value = null
+                val response = api.addEvent(event)
+                if (response.isSuccessful) {
+                    refreshEvents()
+                    _error.value = "Событие добавлено!"
+                } else {
+                    _error.value = response.errorBody()?.string() ?: "Ошибка добавления"
+                }
             } catch (e: Exception) {
-                _error.value = "Ошибка обновления события: ${e.message}"
-                e.printStackTrace()
+                _error.value = "Ошибка: ${e.message}"
             } finally {
                 _isLoading.value = false
             }
         }
     }
 
-    fun deleteEvent(event: Event) {
+    fun updateEvent(event: EventDto) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                notificationService.cancelNotification(event)
-                eventsRepository.deleteEvent(event.id)
-                refreshEvents()
-                _error.value = null
+                val response = api.updateEvent(event.id!!, event)
+                if (response.isSuccessful) {
+                    refreshEvents()
+                } else {
+                    _error.value = response.errorBody()?.string() ?: "Ошибка обновления"
+                }
             } catch (e: Exception) {
-                _error.value = "Ошибка удаления события: ${e.message}"
-                e.printStackTrace()
+                _error.value = "Ошибка: ${e.message}"
             } finally {
                 _isLoading.value = false
             }
         }
     }
 
-    fun toggleEventComplete(event: Event) {
-        val updatedEvent = event.copy(isCompleted = !event.isCompleted)
-        updateEvent(updatedEvent)
+    fun deleteEvent(event: EventDto) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val response = api.deleteEvent(event.id!!)
+                if (response.isSuccessful) {
+                    refreshEvents()
+                    _error.value = "Событие удалено!"
+                } else {
+                    _error.value = response.errorBody()?.string() ?: "Ошибка удаления"
+                }
+            } catch (e: Exception) {
+                _error.value = "Ошибка: ${e.message}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun toggleEventComplete(event: EventDto) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val response = api.toggleComplete(event.id!!)
+                if (response.isSuccessful) {
+                    refreshEvents()
+                } else {
+                    _error.value = response.errorBody()?.string() ?: "Ошибка"
+                }
+            } catch (e: Exception) {
+                _error.value = "Ошибка: ${e.message}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
     }
 
     fun clearError() {

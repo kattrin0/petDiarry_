@@ -10,12 +10,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.petDiary.R
 import com.example.petDiary.ui.viewmodel.AuthViewModel
 import com.google.android.material.textfield.TextInputLayout
-import kotlinx.coroutines.launch
 
 class LoginFragment : Fragment() {
 
@@ -113,21 +111,18 @@ class LoginFragment : Fragment() {
     }
 
     private fun observeAuthState() {
-        // ← Наблюдаем за авторизацией
         authViewModel.isAuthenticated.observe(viewLifecycleOwner) { isAuthenticated ->
             if (isAuthenticated) {
                 findNavController().popBackStack(R.id.authChoiceFragment, true)
             }
         }
 
-        // ← Наблюдаем за гостевым режимом
         authViewModel.isGuest.observe(viewLifecycleOwner) { isGuest ->
             if (isGuest) {
                 findNavController().popBackStack(R.id.authChoiceFragment, true)
             }
         }
 
-        // ← Наблюдаем за ошибками
         authViewModel.error.observe(viewLifecycleOwner) { errorMessage ->
             errorMessage?.let {
                 Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()

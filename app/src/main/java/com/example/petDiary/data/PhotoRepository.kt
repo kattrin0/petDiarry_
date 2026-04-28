@@ -1,5 +1,4 @@
-// /petDiary/app/src/main/java/com/example/petDiary/data/repository/PhotoRepository.kt
-package com.example.petDiary.data.repository
+package com.example.petDiary.data
 
 import android.content.Context
 import android.util.Log
@@ -17,13 +16,13 @@ class PhotoRepository(private val context: Context) {
     }
 
     /**
-     * Сохранение фото: локально + загрузка на Яндекс.Диск для авторизованных
-     * Возвращает URL для Firebase (Яндекс.Диск) или локальный путь
+     * Сохранение фото: локально + загрузка на Яндекс.Диск
+     * Возвращает URL для сохранения в БД (через ProfileViewModel -> API)
      */
-    suspend fun savePhoto(localPath: String, isAuthorized: Boolean): String? =
+    suspend fun savePhoto(localPath: String, saveToCloud: Boolean = true): String? =
         withContext(Dispatchers.IO) {
             try {
-                Log.d(TAG, "savePhoto: $localPath, isAuthorized: $isAuthorized")
+                Log.d(TAG, "savePhoto: $localPath, saveToCloud: $saveToCloud")
 
                 val sourceFile = File(localPath)
                 if (!sourceFile.exists()) {
@@ -36,13 +35,12 @@ class PhotoRepository(private val context: Context) {
                 Log.d(TAG, "Локальная копия: $localFileName")
 
                 // Для авторизованных пользователей загружаем в облако
-                if (isAuthorized) {
+                if (saveToCloud) {
                     Log.d(TAG, "Загрузка на Яндекс.Диск...")
                     val cloudUrl = yandexDiskService.uploadPhoto(localPath)
 
                     if (cloudUrl != null) {
                         Log.d(TAG, "✓ Загружено на Яндекс.Диск: $cloudUrl")
-                        // Возвращаем URL для сохранения в Firebase
                         return@withContext cloudUrl
                     } else {
                         Log.e(TAG, "✗ Ошибка загрузки на Яндекс.Диск")
@@ -74,7 +72,7 @@ class PhotoRepository(private val context: Context) {
     suspend fun getPhotoPath(photoIdentifier: String): String? =
         withContext(Dispatchers.IO) {
             try {
-                // Если это URL с Яндекс.Диска - возвращаем как есть для Glide
+                // Если это URL с Яндекс.Диска
                 if (photoIdentifier.startsWith("https://")) {
                     Log.d(TAG, "Это URL с Яндекс.Диска")
                     return@withContext photoIdentifier

@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.example.petDiary.domain.model.PlacemarkData
+import com.example.petDiary.data.PlacemarkData
 import com.yandex.mapkit.geometry.Point
 
 class MapViewModel(application: Application) : AndroidViewModel(application) {

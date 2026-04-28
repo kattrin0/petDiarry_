@@ -12,8 +12,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.Observer
 import com.example.petDiary.R
-import com.example.petDiary.domain.model.Event
-import com.example.petDiary.domain.model.PetProfile
+import com.example.petDiary.network.models.EventDto
+import com.example.petDiary.network.models.PetProfileDto
 import com.example.petDiary.ui.viewmodel.HomeViewModel
 import com.google.android.material.card.MaterialCardView
 import java.io.File
@@ -56,34 +56,31 @@ class HomeFragment : Fragment() {
     }
 
     private fun initViews(view: View) {
-        // Инициализация элементов совета
         tvTipEmoji = view.findViewById(R.id.tvTipEmoji)
         tvTipTitle = view.findViewById(R.id.tvTipTitle)
         tvTipText = view.findViewById(R.id.tvTipText)
 
-        // Инициализация элементов карточки питомца
         tvPetName = view.findViewById(R.id.tvPetName)
         tvPetBreed = view.findViewById(R.id.tvPetBreed)
         tvPetAge = view.findViewById(R.id.tvPetAge)
         ivPetPhoto = view.findViewById(R.id.ivPetPhoto)
 
-        // Инициализация элементов событий на сегодня
         cardTodayEvents = view.findViewById(R.id.cardTodayEvents)
         llTodayEventsList = view.findViewById(R.id.llTodayEventsList)
         tvNoTodayEvents = view.findViewById(R.id.tvNoTodayEvents)
     }
 
     private fun setupObservers() {
-        viewModel.petProfile.observe(viewLifecycleOwner, Observer { profile ->
-            updatePetProfile(profile)
+        viewModel.petProfile.observe(viewLifecycleOwner, Observer { profile: PetProfileDto? ->
+            profile?.let { updatePetProfile(it) }
         })
-        viewModel.todayEvents.observe(viewLifecycleOwner, Observer { events ->
-            updateTodayEvents(events)
+
+        viewModel.todayEvents.observe(viewLifecycleOwner, Observer { events: List<EventDto>? ->
+            events?.let { updateTodayEvents(it) }
         })
     }
 
-    private fun updatePetProfile(profile: PetProfile) {
-
+    private fun updatePetProfile(profile: PetProfileDto) {
         tvPetName.text = if (profile.name.isNotBlank()) profile.name else "Имя не указано"
         tvPetBreed.text = if (profile.breed.isNotBlank()) profile.breed else "Порода не указана"
 
@@ -129,8 +126,9 @@ class HomeFragment : Fragment() {
                     }
                 }
 
-                // с Яндекс.Диска (URL)
                 if (photoPath.startsWith("https://")) {
+                    // TODO: Загрузить по другому
+                    // Glide.with(this).load(photoPath).into(ivPetPhoto)
                     return
                 }
             } catch (e: Exception) {
@@ -141,7 +139,8 @@ class HomeFragment : Fragment() {
         ivPetPhoto.setImageResource(R.drawable.ic_paw1)
         ivPetPhoto.setPadding(12, 12, 12, 12)
     }
-    private fun updateTodayEvents(events: List<Event>) {
+
+    private fun updateTodayEvents(events: List<EventDto>) {
         llTodayEventsList.removeAllViews()
         if (events.isEmpty()) {
             tvNoTodayEvents.visibility = View.VISIBLE
@@ -166,7 +165,7 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun createTodayEventView(event: Event): View {
+    private fun createTodayEventView(event: EventDto): View {
         val view = LayoutInflater.from(requireContext())
             .inflate(R.layout.item_today_event_home, llTodayEventsList, false)
         val tvEventTime = view.findViewById<TextView>(R.id.tvEventTime)

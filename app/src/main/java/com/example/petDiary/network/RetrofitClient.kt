@@ -9,8 +9,8 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    private const val BASE_URL = "http://192.168.0.106:8080/"  // Для эмулятора
-    // private const val BASE_URL = "http://localhost:8080/"  // Для реального устройства
+    private const val BASE_URL = "http://192.168.0.17:8080/"  // Для эмулятора
+     //private const val BASE_URL = "http://localhost:8080/"  // Для реального устройства
 
     private lateinit var tokenManager: TokenManager
 
@@ -29,7 +29,6 @@ object RetrofitClient {
                 val original = chain.request()
                 val requestBuilder = original.newBuilder()
 
-                // Добавляем токен в заголовок
                 tokenManager.getToken()?.let { token ->
                     requestBuilder.header("Authorization", "Bearer $token")
                 }

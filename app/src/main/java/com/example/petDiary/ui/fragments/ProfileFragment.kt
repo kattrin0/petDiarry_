@@ -18,7 +18,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.Observer
 import com.example.petDiary.R
-import com.example.petDiary.network.models.PetProfileDto  // ← Импортируем DTO
+import com.example.petDiary.network.models.PetProfileDto
 import com.example.petDiary.ui.viewmodel.ProfileViewModel
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -69,7 +69,6 @@ class ProfileFragment : Fragment() {
     private var currentPhotoUri: Uri? = null
     private var savedPhotoPath: String? = null
 
-    // Список пород
     private val dogBreeds = listOf(
         "Лабрадор-ретривер", "Немецкая овчарка", "Золотистый ретривер", "Французский бульдог",
         "Бульдог", "Пудель", "Бигль", "Ротвейлер", "Такса", "Йоркширский терьер",
@@ -153,7 +152,6 @@ class ProfileFragment : Fragment() {
     }
 
     private fun setupObservers() {
-        // ← Используем PetProfileDto
         viewModel.petProfile.observe(viewLifecycleOwner, Observer { profile: PetProfileDto? ->
             if (profile != null) {
                 updateProfileUI(profile)
@@ -176,13 +174,11 @@ class ProfileFragment : Fragment() {
         })
     }
 
-    // ← Используем PetProfileDto
     private fun updateProfileUI(profile: PetProfileDto) {
         etPetName.setText(profile.name)
         actvBreed.setText(profile.breed, false)
         etBirthDate.setText(profile.birthDate)
 
-        // Вес теперь Double -> преобразуем в строку
         val weightStr = if (profile.weight > 0) {
             if (profile.weight % 1 == 0.0) {
                 profile.weight.toInt().toString()
@@ -231,7 +227,6 @@ class ProfileFragment : Fragment() {
             return
         }
 
-        // ← Используем PetProfileDto
         val profile = PetProfileDto(
             name = name,
             breed = breed,
@@ -351,7 +346,6 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    // ← Исправленный метод с PetProfileDto
     private fun updateReadonlyView() {
         val profile = viewModel.petProfile.value ?: return
 

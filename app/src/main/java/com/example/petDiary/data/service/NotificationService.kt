@@ -8,7 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import com.example.petDiary.NotificationReceiver
-import com.example.petDiary.domain.model.Event
+import com.example.petDiary.network.models.EventDto
 import java.util.*
 
 class NotificationService(private val context: Context) {
@@ -32,19 +32,19 @@ class NotificationService(private val context: Context) {
         }
     }
 
-    fun scheduleNotification(event: Event) {
+    fun scheduleNotification(event: EventDto) {
         try {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
             val intent = Intent(context, NotificationReceiver::class.java).apply {
-                putExtra("event_id", event.id)
+                putExtra("event_id", event.id ?: 0L)
                 putExtra("event_title", event.title)
-                putExtra("event_description", event.description)
+                putExtra("event_description", event.description ?: "")
             }
 
             val pendingIntent = PendingIntent.getBroadcast(
                 context,
-                event.id.toInt(),
+                (event.id ?: 0L).toInt(),
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
@@ -79,13 +79,13 @@ class NotificationService(private val context: Context) {
         }
     }
 
-    fun cancelNotification(event: Event) {
+    fun cancelNotification(event: EventDto) {
         try {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             val intent = Intent(context, NotificationReceiver::class.java)
             val pendingIntent = PendingIntent.getBroadcast(
                 context,
-                event.id.toInt(),
+                (event.id ?: 0L).toInt(),
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
@@ -95,4 +95,3 @@ class NotificationService(private val context: Context) {
         }
     }
 }
-

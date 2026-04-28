@@ -16,7 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.Observer
 import com.example.petDiary.R
-import com.example.petDiary.network.models.EventDto  // ← Импортируем DTO
+import com.example.petDiary.network.models.EventDto
 import com.example.petDiary.ui.adapter.GroupedEventAdapter
 import com.example.petDiary.ui.viewmodel.CalendarViewModel
 import com.google.android.material.textfield.TextInputEditText
@@ -59,7 +59,6 @@ class CalendarFragment : Fragment() {
         setupClickListeners()
 
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            // Можно показать/скрыть ProgressBar
         }
 
         viewModel.error.observe(viewLifecycleOwner) { errorMessage ->
@@ -115,7 +114,6 @@ class CalendarFragment : Fragment() {
         }
     }
 
-    // ← Используем EventDto
     private fun updateEventsList(events: List<EventDto>) {
         adapter.updateList(events)
 
@@ -128,14 +126,12 @@ class CalendarFragment : Fragment() {
         }
     }
 
-    // ← Используем EventDto
     private fun toggleEventComplete(event: EventDto) {
         viewModel.toggleEventComplete(event)
         val message = if (event.completed) "Отмечено как невыполненное" else "Выполнено!"
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 
-    // ← Используем EventDto
     private fun deleteEvent(event: EventDto) {
         AlertDialog.Builder(requireContext())
             .setTitle("Удалить?")
@@ -148,7 +144,6 @@ class CalendarFragment : Fragment() {
             .show()
     }
 
-    // ← Используем EventDto
     private fun showEventDetails(event: EventDto) {
         val message = buildString {
             append("📅 ${event.date}")

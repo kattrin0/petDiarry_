@@ -1,14 +1,16 @@
 package com.example.petDiary.ui.viewmodel
 
 import android.app.Application
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.example.petDiary.data.repository.ThemeRepository
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
-    private val themeRepository = ThemeRepository(application)
+
+    private val prefs: SharedPreferences = application.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
 
     private val _themeMode = MutableLiveData<Int>()
     val themeMode: LiveData<Int> = _themeMode
@@ -18,16 +20,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun loadTheme() {
-        val mode = themeRepository.getThemeMode()
+        val mode = prefs.getInt("theme_mode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
         _themeMode.value = mode
     }
 
     fun getThemeMode(): Int {
-        return themeRepository.getThemeMode()
+        return prefs.getInt("theme_mode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
     }
 
     fun saveThemeMode(mode: Int) {
-        themeRepository.saveThemeMode(mode)
+        prefs.edit().putInt("theme_mode", mode).apply()
         _themeMode.value = mode
         AppCompatDelegate.setDefaultNightMode(mode)
     }
@@ -40,4 +42,3 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         )
     }
 }
-

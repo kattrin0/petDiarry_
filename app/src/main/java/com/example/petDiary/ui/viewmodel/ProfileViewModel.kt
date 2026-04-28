@@ -5,13 +5,16 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.example.petDiary.data.PhotoRepository
 import com.example.petDiary.network.RetrofitClient
+import com.example.petDiary.network.TokenManager
 import com.example.petDiary.network.models.PetProfileDto
 import kotlinx.coroutines.launch
 
 class ProfileViewModel(application: Application) : AndroidViewModel(application) {
 
     private val api = RetrofitClient.apiService
+    private val photoRepository = PhotoRepository(application)
 
     private val _petProfile = MutableLiveData<PetProfileDto>()
     val petProfile: LiveData<PetProfileDto> = _petProfile
@@ -31,9 +34,20 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
             try {
                 val response = api.getProfile()
                 if (response.isSuccessful) {
-                    val profile = response.body()
-                    _petProfile.value = profile ?: PetProfileDto()
-                    _hasSavedData.value = profile != null
+                    var profile = response.body() ?: PetProfileDto()
+
+                    // Если фото сохранено как локальный путь, проверяем существует ли файл
+                    profile.photoPath?.let { photoPath ->
+                        if (!photoPath.startsWith("https://")) {
+                            val localPath = photoRepository.getPhotoPath(photoPath)
+                            if (localPath == null) {
+                                profile = profile.copy(photoPath = null)
+                            }
+                        }
+                    }
+
+                    _petProfile.value = profile
+                    _hasSavedData.value = true
                 } else {
                     _petProfile.value = PetProfileDto()
                     _hasSavedData.value = false
@@ -52,9 +66,14 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
             try {
                 var finalProfile = profile
 
+                // Если есть новое фото - загружаем на Яндекс.Диск
                 if (photoLocalPath != null) {
-                    // TODO: Загрузка фото на сервер
-                    // finalProfile = profile.copy(photoPath = uploadedUrl)
+                    // Определяем, нужно ли загружать в облако
+                    val tokenManager = TokenManager(getApplication())
+                    val isAuthorized = tokenManager.getToken() != null
+
+                    val photoUrl = photoRepository.savePhoto(photoLocalPath, isAuthorized)
+                    finalProfile = profile.copy(photoPath = photoUrl)
                 }
 
                 val response = api.saveProfile(finalProfile)

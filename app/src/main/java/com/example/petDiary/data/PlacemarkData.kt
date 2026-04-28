@@ -1,4 +1,4 @@
-package com.example.petDiary.domain.model
+package com.example.petDiary.data
 
 import com.yandex.mapkit.geometry.Point
 
@@ -13,4 +13,3 @@ data class PlacemarkData(
     val website: String? = null,
     val point: Point
 )
-

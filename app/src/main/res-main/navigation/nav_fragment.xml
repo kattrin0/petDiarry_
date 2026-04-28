@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/authChoiceFragment"
         android:name="com.example.petDiary.ui.fragments.AuthChoiceFragment"
-        android:label="Вход"
+        android:label="Auth"
         tools:layout="@layout/auth_choice_fragment">
 
         <action
@@ -20,31 +20,31 @@
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.example.petDiary.ui.fragments.LoginFragment"
-        android:label="Вход"
+        android:label="Login"
         tools:layout="@layout/login_fragment" />
 
     <fragment
         android:id="@+id/calendarFragment"
         android:name="com.example.petDiary.ui.fragments.CalendarFragment"
-        android:label="Календарь"
+        android:label="Calendar"
         tools:layout="@layout/fragment_calendar" />
 
     <fragment
         android:id="@+id/mapFragment"
         android:name="com.example.petDiary.ui.fragments.MapFragment"
-        android:label="Карта"
+        android:label="Map"
         tools:layout="@layout/fragment_map" />
 
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.example.petDiary.ui.fragments.HomeFragment"
-        android:label="Главная"
+        android:label="Home"
         tools:layout="@layout/fragment_home" />
 
     <fragment
         android:id="@+id/profileFragment"
         android:name="com.example.petDiary.ui.fragments.ProfileFragment"
-        android:label="Профиль"
+        android:label="Profile"
         tools:layout="@layout/fragment_profile" />
 
 </navigation>

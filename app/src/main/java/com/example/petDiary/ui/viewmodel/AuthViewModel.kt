@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     private val api = RetrofitClient.apiService
-    private val tokenManager = com.example.petDiary.network.TokenManager(application)
+    private val tokenManager = TokenManager(application)
 
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
@@ -26,6 +26,10 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _isGuest = MutableLiveData<Boolean>()
     val isGuest: LiveData<Boolean> = _isGuest
+
+    // НОВЫЙ LiveData для отслеживания выхода
+    private val _onSignOut = MutableLiveData<Boolean>()
+    val onSignOut: LiveData<Boolean> = _onSignOut
 
     init {
         // Проверяем, есть ли сохранённый токен
@@ -50,7 +54,11 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                     _isGuest.value = false
                     _error.value = "Регистрация успешна!"
                 } else {
-                    _error.value = response.errorBody()?.string() ?: "Ошибка регистрации"
+                    val errorBody = response.errorBody()?.string()
+                    _error.value = when {
+                        errorBody?.contains("already exists") == true -> "Пользователь с таким email уже существует"
+                        else -> "Ошибка регистрации"
+                    }
                 }
             } catch (e: Exception) {
                 _error.value = "Ошибка: ${e.message}"
@@ -75,7 +83,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                     _isGuest.value = false
                     _error.value = "Вход выполнен!"
                 } else {
-                    _error.value = response.errorBody()?.string() ?: "Ошибка входа"
+                    _error.value = "Неверный email или пароль"
                 }
             } catch (e: Exception) {
                 _error.value = "Ошибка: ${e.message}"
@@ -113,10 +121,15 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         tokenManager.clear()
         _isAuthenticated.value = false
         _isGuest.value = false
+        _onSignOut.value = true
         _error.value = "Вы вышли из аккаунта"
     }
 
     fun clearError() {
         _error.value = null
+    }
+
+    fun clearSignOut() {
+        _onSignOut.value = false
     }
 }

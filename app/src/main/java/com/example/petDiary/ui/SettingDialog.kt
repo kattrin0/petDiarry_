@@ -23,17 +23,8 @@ class SettingsDialog : DialogFragment() {
 
         val items = mutableListOf("Светлая тема", "Темная тема", "Системная тема")
 
-        authViewModel.isGuest.observe(this) { isGuest ->
-            if (isGuest) {
-                items.add("Выйти (гостевой режим)")
-            } else {
-                items.add("Выйти из аккаунта")
-            }
-        }
-
-         if (items.size == 3) {
-            items.add("Выйти из аккаунта")
-        }
+        val logoutText = "Выйти из аккаунта"
+        items.add(logoutText)
 
         builder.setTitle("Настройки")
             .setItems(items.toTypedArray()) { _, which ->
@@ -54,6 +45,7 @@ class SettingsDialog : DialogFragment() {
             .setMessage("Вы уверены, что хотите выйти?")
             .setPositiveButton("Да") { _, _ ->
                 authViewModel.signOut()
+                dismiss()
             }
             .setNegativeButton("Нет", null)
             .show()

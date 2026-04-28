@@ -8,7 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import com.example.petDiary.NotificationReceiver
-import com.example.petDiary.network.models.EventDto
+import com.example.petDiary.data.models.EventDto
 import java.util.*
 
 class NotificationService(private val context: Context) {

@@ -5,9 +5,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.petDiary.network.RetrofitClient
-import com.example.petDiary.network.TokenManager
-import com.example.petDiary.network.models.AuthRequest
+import com.example.petDiary.data.RetrofitClient
+import com.example.petDiary.data.TokenManager
+import com.example.petDiary.data.models.AuthRequest
 import kotlinx.coroutines.launch
 
 class AuthViewModel(application: Application) : AndroidViewModel(application) {

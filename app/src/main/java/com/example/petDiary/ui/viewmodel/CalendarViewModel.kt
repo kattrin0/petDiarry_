@@ -5,8 +5,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.petDiary.network.RetrofitClient
-import com.example.petDiary.network.models.EventDto
+import com.example.petDiary.data.RetrofitClient
+import com.example.petDiary.data.models.EventDto
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*

@@ -18,7 +18,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.Observer
 import com.example.petDiary.R
-import com.example.petDiary.network.models.PetProfileDto
+import com.example.petDiary.data.models.PetProfileDto
 import com.example.petDiary.ui.viewmodel.ProfileViewModel
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder

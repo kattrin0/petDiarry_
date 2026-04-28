@@ -1,4 +1,4 @@
-package com.example.petDiary.network.models
+package com.example.petDiary.data.models
 
 data class AuthResponse(
     val token: String,

@@ -5,9 +5,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.petDiary.network.RetrofitClient
-import com.example.petDiary.network.models.EventDto
-import com.example.petDiary.network.models.PetProfileDto
+import com.example.petDiary.data.RetrofitClient
+import com.example.petDiary.data.models.EventDto
+import com.example.petDiary.data.models.PetProfileDto
 import kotlinx.coroutines.launch
 
 class HomeViewModel(application: Application) : AndroidViewModel(application) {

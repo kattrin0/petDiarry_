@@ -1,6 +1,7 @@
-package com.example.petDiary.network
+package com.example.petDiary.data
 
 import android.content.Context
+import com.example.petDiary.data.TokenManager
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit

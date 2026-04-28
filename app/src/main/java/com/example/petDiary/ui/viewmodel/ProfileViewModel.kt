@@ -6,9 +6,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.petDiary.data.PhotoRepository
-import com.example.petDiary.network.RetrofitClient
-import com.example.petDiary.network.TokenManager
-import com.example.petDiary.network.models.PetProfileDto
+import com.example.petDiary.data.RetrofitClient
+import com.example.petDiary.data.TokenManager
+import com.example.petDiary.data.models.PetProfileDto
 import kotlinx.coroutines.launch
 
 class ProfileViewModel(application: Application) : AndroidViewModel(application) {

@@ -10,7 +10,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.example.petDiary.R
-import com.example.petDiary.network.models.EventDto
+import com.example.petDiary.data.models.EventDto
 import java.text.SimpleDateFormat
 import java.util.*
 

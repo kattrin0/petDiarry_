@@ -1,8 +1,17 @@
-package com.example.petDiary.network
+package com.example.petDiary.data
 
-import com.example.petDiary.network.models.*
-import retrofit2.http.*
+import com.example.petDiary.data.models.AuthRequest
+import com.example.petDiary.data.models.AuthResponse
+import com.example.petDiary.data.models.EventDto
+import com.example.petDiary.data.models.PetProfileDto
 import retrofit2.Response
+import retrofit2.http.Body
+import retrofit2.http.DELETE
+import retrofit2.http.GET
+import retrofit2.http.PATCH
+import retrofit2.http.POST
+import retrofit2.http.PUT
+import retrofit2.http.Path
 
 interface ApiService {
 

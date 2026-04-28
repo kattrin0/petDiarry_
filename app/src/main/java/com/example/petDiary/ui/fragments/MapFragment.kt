@@ -174,24 +174,13 @@ class MapFragment : Fragment(), UserLocationObjectListener {
     }
 
     private fun moveToUserLocation() {
-        val location = viewModel.userLocation.value
+        val location = userLocationLayer?.cameraPosition()?.target
         if (location != null) {
             mapView.map.move(
-                CameraPosition(location, 15.0f, 0.0f, 0.0f),
+                CameraPosition(location, 16.0f, 0.0f, 0.0f),
                 Animation(Animation.Type.SMOOTH, 1.0f),
                 null
             )
-        } else {
-            val cameraPosition = userLocationLayer?.cameraPosition()
-            if (cameraPosition != null) {
-                mapView.map.move(
-                    CameraPosition(cameraPosition.target, 15.0f, 0.0f, 0.0f),
-                    Animation(Animation.Type.SMOOTH, 1.0f),
-                    null
-                )
-            } else {
-                Snackbar.make(requireView(), "Определение местоположения...", Snackbar.LENGTH_SHORT).show()
-            }
         }
     }
 
@@ -322,7 +311,6 @@ class MapFragment : Fragment(), UserLocationObjectListener {
                     scale = 0.045f
                     zIndex = 10f
                     // Якорь: (0.5, 1.0) — низ по центру, чтобы пин указывал на координату
-                    // Если иконка квадратная/круглая — можно оставить (0.5, 0.5)
                     anchor = PointF(0.5f, 0.5f)
 
                 })
@@ -425,7 +413,6 @@ class MapFragment : Fragment(), UserLocationObjectListener {
             userLocationView.arrow.setIcon(
                 ImageProvider.fromResource(requireContext(), R.drawable.ic_map)
             )
-
             userLocationView.accuracyCircle.fillColor = Color.argb(50, 76, 175, 80)
         } catch (e: Exception) {
             Log.e("MapFragment", "Ошибка установки иконки местоположения", e)

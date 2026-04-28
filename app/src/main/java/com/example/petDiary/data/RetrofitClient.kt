@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    private const val BASE_URL = "http://192.168.0.17:8080/"  // Для эмулятора
+    private const val BASE_URL = "http://192.168.119.194:8080/"  // Для эмулятора
      //private const val BASE_URL = "http://localhost:8080/"  // Для реального устройства
 
     private lateinit var tokenManager: TokenManager

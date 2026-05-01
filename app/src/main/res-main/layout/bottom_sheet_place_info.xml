@@ -73,70 +73,70 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="5dp">
 
-            <!-- Статус и рейтинг -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+<!--            &lt;!&ndash; Статус и рейтинг &ndash;&gt;-->
+<!--            <LinearLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:gravity="center_vertical"-->
+<!--                android:orientation="horizontal">-->
 
-                <!-- Статус работы -->
-                <TextView
-                    android:id="@+id/tvOpenStatus"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:drawablePadding="6dp"
-                    android:text="Открыто"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
+<!--                &lt;!&ndash; Статус работы &ndash;&gt;-->
+<!--                <TextView-->
+<!--                    android:id="@+id/tvOpenStatus"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:drawablePadding="6dp"-->
+<!--                    android:text="Открыто"-->
+<!--                    android:textSize="14sp"-->
+<!--                    android:textStyle="bold" />-->
 
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_weight="1" />
+<!--                <View-->
+<!--                    android:layout_width="0dp"-->
+<!--                    android:layout_height="0dp"-->
+<!--                    android:layout_weight="1" />-->
 
-                <!-- Рейтинг -->
-                <LinearLayout
-                    android:id="@+id/layoutRating"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:visibility="gone">
+<!--                &lt;!&ndash; Рейтинг &ndash;&gt;-->
+<!--                <LinearLayout-->
+<!--                    android:id="@+id/layoutRating"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:gravity="center_vertical"-->
+<!--                    android:orientation="horizontal"-->
+<!--                    android:visibility="gone">-->
 
-                    <TextView
-                        android:id="@+id/tvRating"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="4.5"
-                        android:textColor="#FFA000"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
+<!--                    <TextView-->
+<!--                        android:id="@+id/tvRating"-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:text="4.5"-->
+<!--                        android:textColor="#FFA000"-->
+<!--                        android:textSize="16sp"-->
+<!--                        android:textStyle="bold" />-->
 
-                    <RatingBar
-                        android:id="@+id/ratingBar"
-                        style="?android:attr/ratingBarStyleSmall"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:isIndicator="true"
-                        android:numStars="5"
-                        android:progressTint="#FFA000"
-                        android:rating="4.5"
-                        android:stepSize="0.1" />
+<!--                    <RatingBar-->
+<!--                        android:id="@+id/ratingBar"-->
+<!--                        style="?android:attr/ratingBarStyleSmall"-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_marginStart="4dp"-->
+<!--                        android:isIndicator="true"-->
+<!--                        android:numStars="5"-->
+<!--                        android:progressTint="#FFA000"-->
+<!--                        android:rating="4.5"-->
+<!--                        android:stepSize="0.1" />-->
 
-                    <TextView
-                        android:id="@+id/tvRatingsCount"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:text="(120 отзывов)"
-                        android:textColor="#888888"
-                        android:textSize="12sp" />
+<!--                    <TextView-->
+<!--                        android:id="@+id/tvRatingsCount"-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_marginStart="4dp"-->
+<!--                        android:text="(120 отзывов)"-->
+<!--                        android:textColor="#888888"-->
+<!--                        android:textSize="12sp" />-->
 
-                </LinearLayout>
+<!--                </LinearLayout>-->
 
             </LinearLayout>
 
@@ -269,19 +269,19 @@
                 android:layout_marginTop="20dp"
                 android:orientation="horizontal">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnCall"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="48dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_weight="1"
-                    android:text="Позвонить"
-                    android:textColor="@color/greenPrimary"
-                    app:cornerRadius="12dp"
-                    app:icon="@drawable/ic_map"
-                    app:iconTint="@color/greenPrimary"
-                    app:strokeColor="@color/greenPrimary" />
+<!--                <com.google.android.material.button.MaterialButton-->
+<!--                    android:id="@+id/btnCall"-->
+<!--                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"-->
+<!--                    android:layout_width="0dp"-->
+<!--                    android:layout_height="48dp"-->
+<!--                    android:layout_marginEnd="8dp"-->
+<!--                    android:layout_weight="1"-->
+<!--                    android:text="Позвонить"-->
+<!--                    android:textColor="@color/greenPrimary"-->
+<!--                    app:cornerRadius="12dp"-->
+<!--                    app:icon="@drawable/ic_map"-->
+<!--                    app:iconTint="@color/greenPrimary"-->
+<!--                    app:strokeColor="@color/greenPrimary" />-->
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnRoute"
@@ -291,12 +291,12 @@
                     android:backgroundTint="@color/greenPrimary"
                     android:text="Перейти в карты"
                     app:cornerRadius="12dp"
-                    app:icon="@drawable/ic_map" />
+                    />
 
             </LinearLayout>
 
         </LinearLayout>
 
-    </LinearLayout>
+<!--    </LinearLayout>-->
 
 </androidx.core.widget.NestedScrollView>

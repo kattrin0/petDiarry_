@@ -1,18 +1,14 @@
 package com.example.petDiary.data
 
 import android.content.Context
-import com.example.petDiary.data.TokenManager
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    private const val BASE_URL = "http://192.168.119.194:8080/"  // Для эмулятора
-     //private const val BASE_URL = "http://localhost:8080/"  // Для реального устройства
-
+    private const val BASE_URL = "http://192.168.0.17:8080/"
+     //private const val BASE_URL = "http://localhost:8080/"
     private lateinit var tokenManager: TokenManager
 
     fun initialize(context: Context) {
@@ -20,24 +16,20 @@ object RetrofitClient {
     }
 
     private val client: OkHttpClient by lazy {
-        val loggingInterceptor = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
-        }
-
         OkHttpClient.Builder()
-            .addInterceptor(loggingInterceptor)
             .addInterceptor { chain ->
                 val original = chain.request()
                 val requestBuilder = original.newBuilder()
 
-                tokenManager.getToken()?.let { token ->
-                    requestBuilder.header("Authorization", "Bearer $token")
+                // если гость
+                if (!tokenManager.isGuestMode()) {
+                    tokenManager.getToken()?.let { token ->
+                        requestBuilder.header("Authorization", "Bearer $token")
+                    }
                 }
 
                 chain.proceed(requestBuilder.build())
             }
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
             .build()
     }
 

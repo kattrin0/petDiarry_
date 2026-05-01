@@ -11,35 +11,38 @@ class TokenManager(context: Context) {
     companion object {
         private const val KEY_AUTH_TOKEN = "auth_token"
         private const val KEY_USER_ID = "user_id"
+        private const val KEY_IS_GUEST = "is_guest"
     }
 
-    // Сохранить токен
     fun saveToken(token: String) {
         prefs.edit().putString(KEY_AUTH_TOKEN, token).apply()
     }
 
-    // Получить токен
     fun getToken(): String? {
         return prefs.getString(KEY_AUTH_TOKEN, null)
     }
 
-    // Сохранить ID пользователя
     fun saveUserId(userId: Long) {
         prefs.edit().putLong(KEY_USER_ID, userId).apply()
     }
 
-    // Получить ID пользователя
     fun getUserId(): Long {
         return prefs.getLong(KEY_USER_ID, -1L)
     }
 
-    // Очистить все данные (при выходе)
+    fun setGuestMode(isGuest: Boolean) {
+        prefs.edit().putBoolean(KEY_IS_GUEST, isGuest).apply()
+    }
+
+    fun isGuestMode(): Boolean {
+        return prefs.getBoolean(KEY_IS_GUEST, false)
+    }
+
     fun clear() {
         prefs.edit().clear().apply()
     }
 
-    // Проверить, авторизован ли пользователь
     fun isLoggedIn(): Boolean {
-        return getToken() != null && getUserId() != -1L
+        return getToken() != null && getUserId() != -1L && !isGuestMode()
     }
 }

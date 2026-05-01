@@ -22,6 +22,11 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
         _searchResults.value = results
     }
 
+    fun appendSearchResults(newResults: List<PlacemarkData>) {
+        val current = _searchResults.value.orEmpty()
+        _searchResults.value = current + newResults
+    }
+
     fun clearSearchResults() {
         _searchResults.value = emptyList()
     }

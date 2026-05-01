@@ -18,7 +18,6 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.petDiary.R
@@ -37,6 +36,7 @@ import com.yandex.mapkit.layers.ObjectEvent
 import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.IconStyle
 import com.yandex.mapkit.map.MapObjectCollection
+import com.yandex.mapkit.map.MapObjectTapListener
 import com.yandex.mapkit.map.PlacemarkMapObject
 import com.yandex.mapkit.mapview.MapView
 import com.yandex.mapkit.search.*
@@ -64,6 +64,11 @@ class MapFragment : Fragment(), UserLocationObjectListener {
     private lateinit var viewModel: MapViewModel
     private var currentSearchSession: Session? = null
     private val placemarks = mutableListOf<PlacemarkMapObject>()
+    private val placemarkTapListener = MapObjectTapListener { mapObject, _ ->
+        val placemarkData = mapObject.userData as? PlacemarkData
+        placemarkData?.let { showPlaceInfo(it) }
+        true
+    }
 
     private val locationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -252,15 +257,11 @@ class MapFragment : Fragment(), UserLocationObjectListener {
             val address = item.obj?.descriptionText ?: ""
 
             point?.let {
+
                 val placemarkData = PlacemarkData(
                     name = name,
                     address = address,
                     isVetClinic = isVetClinic,
-                    workingHours = null,
-                    rating = null,
-                    ratingsCount = null,
-                    phones = emptyList(),
-                    website = null,
                     point = it
                 )
                 results.add(placemarkData)
@@ -268,7 +269,7 @@ class MapFragment : Fragment(), UserLocationObjectListener {
             }
         }
 
-        viewModel.setSearchResults(results)
+        viewModel.appendSearchResults(results)
 
         if (response.collection.children.isEmpty()) {
             Snackbar.make(requireView(), "Ничего не найдено по запросу: $query", Snackbar.LENGTH_SHORT).show()
@@ -285,7 +286,6 @@ class MapFragment : Fragment(), UserLocationObjectListener {
     }
 
     private fun updateSearchResults(results: List<PlacemarkData>) {
-        // Результаты уже добавлены на карту в handleSearchResponse
     }
 
     private fun addPlacemark(point: Point, data: PlacemarkData) {
@@ -308,22 +308,16 @@ class MapFragment : Fragment(), UserLocationObjectListener {
                 setIcon(ImageProvider.fromBitmap(bitmap))
                 setIconStyle(IconStyle().apply {
 
-                    scale = 0.045f
+                    scale = 0.06f
                     zIndex = 10f
                     // Якорь: (0.5, 1.0) — низ по центру, чтобы пин указывал на координату
-                    anchor = PointF(0.5f, 0.5f)
+                    anchor = PointF(0.5f, 1.0f)
 
                 })
                 userData = data
             }
 
-            placemark.addTapListener { mapObject, _ ->
-                val placemarkData = mapObject.userData as? PlacemarkData
-                placemarkData?.let {
-                    showPlaceInfo(it)
-                }
-                true
-            }
+            placemark.addTapListener(placemarkTapListener)
 
             placemarks.add(placemark)
             Log.d("MapFragment", " Метка добавлена: ${data.name}, тип: ${if (data.isVetClinic) "ветклиника" else "зоомагазин"}")
@@ -343,42 +337,36 @@ class MapFragment : Fragment(), UserLocationObjectListener {
             val tvPlaceType = view.findViewById<TextView>(R.id.tvPlaceType)
             val tvPlaceName = view.findViewById<TextView>(R.id.tvPlaceName)
             val tvAddress = view.findViewById<TextView>(R.id.tvAddress)
-            val tvOpenStatus = view.findViewById<TextView>(R.id.tvOpenStatus)
-            val layoutRating = view.findViewById<LinearLayout>(R.id.layoutRating)
-            val tvRating = view.findViewById<TextView>(R.id.tvRating)
-            val ratingBar = view.findViewById<RatingBar>(R.id.ratingBar)
-            val tvRatingsCount = view.findViewById<TextView>(R.id.tvRatingsCount)
+//            val tvOpenStatus = view.findViewById<TextView>(R.id.tvOpenStatus)
+//            val layoutRating = view.findViewById<LinearLayout>(R.id.layoutRating)
+//            val tvRating = view.findViewById<TextView>(R.id.tvRating)
+//            val ratingBar = view.findViewById<RatingBar>(R.id.ratingBar)
+//            val tvRatingsCount = view.findViewById<TextView>(R.id.tvRatingsCount)
             val layoutWorkingHours = view.findViewById<LinearLayout>(R.id.layoutWorkingHours)
             val tvWorkingHours = view.findViewById<TextView>(R.id.tvWorkingHours)
             val layoutPhones = view.findViewById<LinearLayout>(R.id.layoutPhones)
             val containerPhones = view.findViewById<LinearLayout>(R.id.containerPhones)
             val layoutWebsite = view.findViewById<LinearLayout>(R.id.layoutWebsite)
             val tvWebsite = view.findViewById<TextView>(R.id.tvWebsite)
-            val btnCall = view.findViewById<MaterialButton>(R.id.btnCall)
+//            val btnCall = view.findViewById<MaterialButton>(R.id.btnCall)
             val btnRoute = view.findViewById<MaterialButton>(R.id.btnRoute)
 
             tvPlaceType.text = if (data.isVetClinic) "Ветеринарная клиника" else "Зоомагазин"
             tvPlaceName.text = data.name
             tvAddress.text = data.address
 
-            tvOpenStatus.text = "Часы работы неизвестны"
-            tvOpenStatus.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.darker_gray))
-            layoutRating.visibility = View.GONE
+            // Скрываем неиспользуемые элементы
+//            tvOpenStatus.text = "Часы работы неизвестны"
+//            tvOpenStatus.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.darker_gray))
+//            layoutRating.visibility = View.GONE
             layoutWorkingHours.visibility = View.GONE
             layoutPhones.visibility = View.GONE
             layoutWebsite.visibility = View.GONE
-            btnCall.visibility = View.GONE
+//            btnCall.visibility = View.GONE
 
             btnRoute.setOnClickListener {
-                val uri = Uri.parse("yandexnavi://build_route?lat_to=${data.point.latitude}&lon_to=${data.point.longitude}")
-                val intent = Intent(Intent.ACTION_VIEW, uri)
-                if (intent.resolveActivity(requireContext().packageManager) != null) {
-                    startActivity(intent)
-                } else {
-                    val mapsUri = Uri.parse("https://yandex.ru/maps/?pt=${data.point.longitude},${data.point.latitude}&z=15")
-                    val mapsIntent = Intent(Intent.ACTION_VIEW, mapsUri)
-                    startActivity(mapsIntent)
-                }
+                openMaps(data.point, data.name)
+                bottomSheetDialog.dismiss()
             }
 
             bottomSheetDialog.show()
@@ -387,6 +375,23 @@ class MapFragment : Fragment(), UserLocationObjectListener {
         }
     }
 
+    private fun openMaps(point: Point, placeName: String) {
+        try {
+            val yandexMapsUri = Uri.parse("yandexmaps://maps.yandex.ru/?pt=${point.longitude},${point.latitude}&z=17&l=map")
+            val yandexMapsIntent = Intent(Intent.ACTION_VIEW, yandexMapsUri)
+
+            if (yandexMapsIntent.resolveActivity(requireContext().packageManager) != null) {
+                startActivity(yandexMapsIntent)
+            } else {
+                val webUri = Uri.parse("https://yandex.ru/maps/?pt=${point.longitude},${point.latitude}&z=17&l=map&text=${placeName}")
+                val webIntent = Intent(Intent.ACTION_VIEW, webUri)
+                startActivity(webIntent)
+            }
+        } catch (e: Exception) {
+            Log.e("MapFragment", "Ошибка открытия Яндекс.Карт", e)
+            Toast.makeText(requireContext(), "Не удалось открыть карты", Toast.LENGTH_SHORT).show()
+        }
+    }
     private fun clearPlacemarks() {
         mapObjects?.clear()
         placemarks.clear()

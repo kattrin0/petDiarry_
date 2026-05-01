@@ -27,15 +27,15 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     private val _isGuest = MutableLiveData<Boolean>()
     val isGuest: LiveData<Boolean> = _isGuest
 
-    // НОВЫЙ LiveData для отслеживания выхода
     private val _onSignOut = MutableLiveData<Boolean>()
     val onSignOut: LiveData<Boolean> = _onSignOut
 
     init {
-        // Проверяем, есть ли сохранённый токен
         val token = tokenManager.getToken()
-        if (token != null) {
+        if (token != null && !tokenManager.isGuestMode()) {
             _isAuthenticated.value = true
+        } else if (tokenManager.isGuestMode()) {
+            _isGuest.value = true
         }
     }
 
@@ -50,6 +50,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                     val authResponse = response.body()!!
                     tokenManager.saveToken(authResponse.token)
                     tokenManager.saveUserId(authResponse.userId)
+                    tokenManager.setGuestMode(false)
                     _isAuthenticated.value = true
                     _isGuest.value = false
                     _error.value = "Регистрация успешна!"
@@ -79,6 +80,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                     val authResponse = response.body()!!
                     tokenManager.saveToken(authResponse.token)
                     tokenManager.saveUserId(authResponse.userId)
+                    tokenManager.setGuestMode(false)
                     _isAuthenticated.value = true
                     _isGuest.value = false
                     _error.value = "Вход выполнен!"
@@ -94,27 +96,15 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun signInAsGuest() {
-        viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                val response = api.guestLogin()
+        val guestId = "guest_${System.currentTimeMillis()}"
 
-                if (response.isSuccessful) {
-                    val authResponse = response.body()!!
-                    tokenManager.saveToken(authResponse.token)
-                    tokenManager.saveUserId(authResponse.userId)
-                    _isGuest.value = true
-                    _isAuthenticated.value = false
-                    _error.value = "Гостевой режим"
-                } else {
-                    _error.value = "Ошибка входа как гость"
-                }
-            } catch (e: Exception) {
-                _error.value = "Ошибка: ${e.message}"
-            } finally {
-                _isLoading.value = false
-            }
-        }
+        tokenManager.saveToken(guestId)
+        tokenManager.saveUserId(-1L)
+        tokenManager.setGuestMode(true)
+
+        _isGuest.value = true
+        _isAuthenticated.value = false
+        _error.value = "Гостевой режим"
     }
 
     fun signOut() {

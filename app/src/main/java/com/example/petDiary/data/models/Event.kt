@@ -1,6 +1,6 @@
 package com.example.petDiary.data.models
 
-data class EventDto(
+data class Event(
     val id: Long? = null,
     val title: String,
     val description: String? = "",

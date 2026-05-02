@@ -1,4 +1,4 @@
-package com.example.petDiary.data
+package com.example.petDiary.data.models
 
 import com.yandex.mapkit.geometry.Point
 

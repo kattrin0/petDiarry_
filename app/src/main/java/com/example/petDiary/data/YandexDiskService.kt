@@ -1,14 +1,14 @@
-package com.example.petDiary.data.service
+package com.example.petDiary.data
 
 import android.content.Context
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.MediaType.Companion.toMediaType
 import org.json.JSONObject
 import java.io.File
 import java.util.concurrent.TimeUnit
@@ -76,7 +76,7 @@ class YandexDiskService(private val context: Context) {
         try {
             val request = Request.Builder()
                 .url("$BASE_URL/resources?path=$APP_FOLDER")
-                .put(RequestBody.create(null, ""))
+                .put(RequestBody.Companion.create(null, ""))
                 .addHeader("Authorization", "OAuth $OAUTH_TOKEN")
                 .build()
 
@@ -146,7 +146,7 @@ class YandexDiskService(private val context: Context) {
             // Публикуем файл
             val publishRequest = Request.Builder()
                 .url("$BASE_URL/resources/publish?path=$remotePath")
-                .put(RequestBody.create(null, ""))
+                .put(RequestBody.Companion.create(null, ""))
                 .addHeader("Authorization", "OAuth $OAUTH_TOKEN")
                 .build()
 

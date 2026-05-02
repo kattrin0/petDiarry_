@@ -1,4 +1,4 @@
-package com.example.petDiary.data
+package com.example.petDiary.data.network
 
 import android.content.Context
 import android.content.SharedPreferences

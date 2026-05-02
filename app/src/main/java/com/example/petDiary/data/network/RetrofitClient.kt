@@ -1,6 +1,7 @@
-package com.example.petDiary.data
+package com.example.petDiary.data.network
 
 import android.content.Context
+import com.example.petDiary.data.network.TokenManager
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

@@ -16,7 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.Observer
 import com.example.petDiary.R
-import com.example.petDiary.data.models.EventDto
+import com.example.petDiary.data.models.Event
 import com.example.petDiary.ui.adapter.GroupedEventAdapter
 import com.example.petDiary.ui.viewmodel.CalendarViewModel
 import com.google.android.material.textfield.TextInputEditText
@@ -114,7 +114,7 @@ class CalendarFragment : Fragment() {
         }
     }
 
-    private fun updateEventsList(events: List<EventDto>) {
+    private fun updateEventsList(events: List<Event>) {
         adapter.updateList(events)
 
         if (events.isEmpty()) {
@@ -126,13 +126,13 @@ class CalendarFragment : Fragment() {
         }
     }
 
-    private fun toggleEventComplete(event: EventDto) {
+    private fun toggleEventComplete(event: Event) {
         viewModel.toggleEventComplete(event)
         val message = if (event.completed) "Отмечено как невыполненное" else "Выполнено!"
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 
-    private fun deleteEvent(event: EventDto) {
+    private fun deleteEvent(event: Event) {
         AlertDialog.Builder(requireContext())
             .setTitle("Удалить?")
             .setMessage("Удалить \"${event.title}\"?")
@@ -144,7 +144,7 @@ class CalendarFragment : Fragment() {
             .show()
     }
 
-    private fun showEventDetails(event: EventDto) {
+    private fun showEventDetails(event: Event) {
         val message = buildString {
             append("📅 ${event.date}")
             val time = event.time ?: ""
@@ -232,7 +232,7 @@ class CalendarFragment : Fragment() {
                     } else ""
 
                     // ← Используем EventDto
-                    val event = EventDto(
+                    val event = Event(
                         title = title,
                         description = description,
                         date = selectedDateString,

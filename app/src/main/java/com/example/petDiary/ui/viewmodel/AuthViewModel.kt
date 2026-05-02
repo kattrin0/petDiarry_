@@ -5,8 +5,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.petDiary.data.RetrofitClient
-import com.example.petDiary.data.TokenManager
+import com.example.petDiary.data.network.RetrofitClient
+import com.example.petDiary.data.network.TokenManager
 import com.example.petDiary.data.models.AuthRequest
 import kotlinx.coroutines.launch
 

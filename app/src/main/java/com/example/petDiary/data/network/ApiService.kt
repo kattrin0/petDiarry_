@@ -1,9 +1,9 @@
-package com.example.petDiary.data
+package com.example.petDiary.data.network
 
 import com.example.petDiary.data.models.AuthRequest
 import com.example.petDiary.data.models.AuthResponse
-import com.example.petDiary.data.models.EventDto
-import com.example.petDiary.data.models.PetProfileDto
+import com.example.petDiary.data.models.Event
+import com.example.petDiary.data.models.PetProfile
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -27,35 +27,35 @@ interface ApiService {
 
     // ========== EVENTS ==========
     @GET("api/events")
-    suspend fun getAllEvents(): Response<List<EventDto>>
+    suspend fun getAllEvents(): Response<List<Event>>
 
     @GET("api/events/active")
-    suspend fun getActiveEvents(): Response<List<EventDto>>
+    suspend fun getActiveEvents(): Response<List<Event>>
 
     @GET("api/events/today")
-    suspend fun getTodayEvents(): Response<List<EventDto>>
+    suspend fun getTodayEvents(): Response<List<Event>>
 
     @POST("api/events")
-    suspend fun addEvent(@Body event: EventDto): Response<EventDto>
+    suspend fun addEvent(@Body event: Event): Response<Event>
 
     @PUT("api/events/{id}")
-    suspend fun updateEvent(@Path("id") id: Long, @Body event: EventDto): Response<EventDto>
+    suspend fun updateEvent(@Path("id") id: Long, @Body event: Event): Response<Event>
 
     @DELETE("api/events/{id}")
     suspend fun deleteEvent(@Path("id") id: Long): Response<Void>
 
     @PATCH("api/events/{id}/toggle")
-    suspend fun toggleComplete(@Path("id") id: Long): Response<EventDto>
+    suspend fun toggleComplete(@Path("id") id: Long): Response<Event>
 
     @DELETE("api/events/past")
     suspend fun removePastEvents(): Response<Void>
 
     // ========== PROFILE ==========
     @GET("api/profile")
-    suspend fun getProfile(): Response<PetProfileDto>
+    suspend fun getProfile(): Response<PetProfile>
 
     @POST("api/profile")
-    suspend fun saveProfile(@Body profile: PetProfileDto): Response<PetProfileDto>
+    suspend fun saveProfile(@Body profile: PetProfile): Response<PetProfile>
 
     @GET("api/profile/exists")
     suspend fun hasProfile(): Response<Boolean>

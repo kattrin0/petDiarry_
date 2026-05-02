@@ -18,7 +18,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.Observer
 import com.example.petDiary.R
-import com.example.petDiary.data.models.PetProfileDto
+import com.example.petDiary.data.models.PetProfile
 import com.example.petDiary.ui.viewmodel.ProfileViewModel
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -152,7 +152,7 @@ class ProfileFragment : Fragment() {
     }
 
     private fun setupObservers() {
-        viewModel.petProfile.observe(viewLifecycleOwner, Observer { profile: PetProfileDto? ->
+        viewModel.petProfile.observe(viewLifecycleOwner, Observer { profile: PetProfile? ->
             if (profile != null) {
                 updateProfileUI(profile)
             }
@@ -174,7 +174,7 @@ class ProfileFragment : Fragment() {
         })
     }
 
-    private fun updateProfileUI(profile: PetProfileDto) {
+    private fun updateProfileUI(profile: PetProfile) {
         etPetName.setText(profile.name)
         actvBreed.setText(profile.breed, false)
         etBirthDate.setText(profile.birthDate)
@@ -227,7 +227,7 @@ class ProfileFragment : Fragment() {
             return
         }
 
-        val profile = PetProfileDto(
+        val profile = PetProfile(
             name = name,
             breed = breed,
             gender = gender,

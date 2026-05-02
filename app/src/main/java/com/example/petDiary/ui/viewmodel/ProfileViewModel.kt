@@ -6,9 +6,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.petDiary.data.PhotoRepository
-import com.example.petDiary.data.RetrofitClient
-import com.example.petDiary.data.TokenManager
-import com.example.petDiary.data.models.PetProfileDto
+import com.example.petDiary.data.network.RetrofitClient
+import com.example.petDiary.data.network.TokenManager
+import com.example.petDiary.data.models.PetProfile
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
 
@@ -20,8 +20,8 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
     private val prefs = application.getSharedPreferences("app_prefs", android.content.Context.MODE_PRIVATE)
     private val gson = Gson()
 
-    private val _petProfile = MutableLiveData<PetProfileDto>()
-    val petProfile: LiveData<PetProfileDto> = _petProfile
+    private val _petProfile = MutableLiveData<PetProfile>()
+    val petProfile: LiveData<PetProfile> = _petProfile
 
     private val _hasSavedData = MutableLiveData<Boolean>()
     val hasSavedData: LiveData<Boolean> = _hasSavedData
@@ -32,15 +32,15 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> = _error
 
-    private fun saveProfileToLocal(profile: PetProfileDto) {
+    private fun saveProfileToLocal(profile: PetProfile) {
         val json = gson.toJson(profile)
         prefs.edit().putString("guest_profile", json).apply()
     }
 
-    private fun loadProfileFromLocal(): PetProfileDto? {
+    private fun loadProfileFromLocal(): PetProfile? {
         val json = prefs.getString("guest_profile", null)
         if (json == null) return null
-        return gson.fromJson(json, PetProfileDto::class.java)
+        return gson.fromJson(json, PetProfile::class.java)
     }
 
     fun loadPetProfile() {
@@ -50,7 +50,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                 _petProfile.value = localProfile
                 _hasSavedData.value = true
             } else {
-                _petProfile.value = PetProfileDto()
+                _petProfile.value = PetProfile()
                 _hasSavedData.value = false
             }
         } else {
@@ -59,7 +59,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                 try {
                     val response = api.getProfile()
                     if (response.isSuccessful) {
-                        var profile = response.body() ?: PetProfileDto()
+                        var profile = response.body() ?: PetProfile()
 
                         profile.photoPath?.let { photoPath ->
                             if (!photoPath.startsWith("https://")) {
@@ -73,7 +73,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                         _petProfile.value = profile
                         _hasSavedData.value = true
                     } else {
-                        _petProfile.value = PetProfileDto()
+                        _petProfile.value = PetProfile()
                         _hasSavedData.value = false
                     }
                 } catch (e: Exception) {
@@ -85,7 +85,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun savePetProfile(profile: PetProfileDto, photoLocalPath: String? = null) {
+    fun savePetProfile(profile: PetProfile, photoLocalPath: String? = null) {
         if (tokenManager.isGuestMode()) {
             var finalProfile = profile
 

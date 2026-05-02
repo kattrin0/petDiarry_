@@ -12,8 +12,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.Observer
 import com.example.petDiary.R
-import com.example.petDiary.data.models.EventDto
-import com.example.petDiary.data.models.PetProfileDto
+import com.example.petDiary.data.models.Event
+import com.example.petDiary.data.models.PetProfile
 import com.example.petDiary.ui.viewmodel.HomeViewModel
 import com.google.android.material.card.MaterialCardView
 import java.io.File
@@ -71,16 +71,16 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupObservers() {
-        viewModel.petProfile.observe(viewLifecycleOwner, Observer { profile: PetProfileDto? ->
+        viewModel.petProfile.observe(viewLifecycleOwner, Observer { profile: PetProfile? ->
             profile?.let { updatePetProfile(it) }
         })
 
-        viewModel.todayEvents.observe(viewLifecycleOwner, Observer { events: List<EventDto>? ->
+        viewModel.todayEvents.observe(viewLifecycleOwner, Observer { events: List<Event>? ->
             events?.let { updateTodayEvents(it) }
         })
     }
 
-    private fun updatePetProfile(profile: PetProfileDto) {
+    private fun updatePetProfile(profile: PetProfile) {
         tvPetName.text = if (profile.name.isNotBlank()) profile.name else "Имя не указано"
         tvPetBreed.text = if (profile.breed.isNotBlank()) profile.breed else "Порода не указана"
 
@@ -140,7 +140,7 @@ class HomeFragment : Fragment() {
         ivPetPhoto.setPadding(12, 12, 12, 12)
     }
 
-    private fun updateTodayEvents(events: List<EventDto>) {
+    private fun updateTodayEvents(events: List<Event>) {
         llTodayEventsList.removeAllViews()
         if (events.isEmpty()) {
             tvNoTodayEvents.visibility = View.VISIBLE
@@ -165,7 +165,7 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun createTodayEventView(event: EventDto): View {
+    private fun createTodayEventView(event: Event): View {
         val view = LayoutInflater.from(requireContext())
             .inflate(R.layout.item_today_event_home, llTodayEventsList, false)
         val tvEventTime = view.findViewById<TextView>(R.id.tvEventTime)

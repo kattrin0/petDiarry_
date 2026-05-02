@@ -3,7 +3,6 @@ import org.gradle.kotlin.dsl.implementation
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id("com.google.gms.google-services")
 }
 
 android {
@@ -26,8 +25,6 @@ android {
 
         buildConfigField("String", "YANDEX_DISK_OAUTH_TOKEN", "\"y0__xDR2YD2Axi11T4g9vWB1RYwpfzn6QfhNewQKFNv49Q_7oKf2YNNhIysdQ\"")
     }
-
-
 
 
 
@@ -79,23 +76,14 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
 
-
-    implementation("com.google.firebase:firebase-auth-ktx:23.2.0")
-    implementation("com.google.firebase:firebase-firestore-ktx:25.1.2")
-    implementation("com.google.firebase:firebase-analytics-ktx:22.2.0")
-
     // Официальный SDK Яндекс.Диска
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
-
-
-    // Для асинхронных запросов
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation("com.github.bumptech.glide:okhttp3-integration:4.16.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
-
 
     // Retrofit для HTTP запросов
     implementation("com.squareup.retrofit2:retrofit:2.9.0")

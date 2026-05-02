@@ -1,19 +1,34 @@
-// NotificationReceiver.kt
-package com.example.petDiary
+package com.example.petDiary.notification
 
+import android.Manifest
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
-import com.example.petDiary.data.service.NotificationService
+import androidx.core.content.ContextCompat
+import com.example.petDiary.R
 import com.example.petDiary.ui.MainActivity
 
 class NotificationReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        val eventId = intent.getLongExtra("event_id", 0)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val ok = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+            if (!ok) {
+                Log.w(TAG, "POST_NOTIFICATIONS not granted — уведомление не показано")
+                return
+            }
+        }
+
+        val eventId = intent.getLongExtra(NotificationService.EXTRA_EVENT_ID, 0L)
         val title = intent.getStringExtra("event_title") ?: "Напоминание"
         val description = intent.getStringExtra("event_description") ?: ""
 
@@ -23,7 +38,7 @@ class NotificationReceiver : BroadcastReceiver() {
 
         val pendingIntent = PendingIntent.getActivity(
             context,
-            eventId.toInt(),
+            NotificationService.notifyId(eventId),
             mainIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
@@ -32,7 +47,8 @@ class NotificationReceiver : BroadcastReceiver() {
             .setSmallIcon(R.drawable.ic_paw1)
             .setContentTitle("🐾 $title")
             .setContentText(if (description.isNotEmpty()) description else "Через 15 минут!")
-            .setStyle(NotificationCompat.BigTextStyle().bigText(
+            .setStyle(
+                NotificationCompat.BigTextStyle().bigText(
                 if (description.isNotEmpty()) "$description\n\nСобытие через 15 минут!"
                 else "Событие через 15 минут!"
             ))
@@ -43,6 +59,10 @@ class NotificationReceiver : BroadcastReceiver() {
             .build()
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(eventId.toInt(), notification)
+        notificationManager.notify(NotificationService.notifyId(eventId), notification)
+    }
+
+    companion object {
+        private const val TAG = "NotificationReceiver"
     }
 }

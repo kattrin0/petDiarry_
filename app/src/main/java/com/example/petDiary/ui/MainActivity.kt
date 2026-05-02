@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
@@ -98,10 +99,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showSettingsDialog() {
-        val settingsDialog = SettingsDialog()
-        settingsDialog.show(supportFragmentManager, SettingsDialog.TAG)
-    }
+
 
     private fun observeAuthState() {
         authViewModel.isAuthenticated.observe(this) { isAuthenticated ->
@@ -158,4 +156,24 @@ class MainActivity : AppCompatActivity() {
 
         navController.navigate(R.id.authChoiceFragment, null, navOptions)
     }
+    private fun showSettingsDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Настройки")
+            .setItems(arrayOf("Выйти из аккаунта")) { _, _ ->
+                showLogoutConfirmation()
+            }
+            .show()
+    }
+
+    private fun showLogoutConfirmation() {
+        AlertDialog.Builder(this)
+            .setTitle("Выход")
+            .setMessage("Вы уверены, что хотите выйти?")
+            .setPositiveButton("Да") { _, _ ->
+                authViewModel.signOut()
+            }
+            .setNegativeButton("Нет", null)
+            .show()
+    }
+
 }

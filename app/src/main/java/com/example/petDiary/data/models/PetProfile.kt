@@ -1,6 +1,6 @@
 package com.example.petDiary.data.models
 
-data class PetProfileDto(
+data class PetProfile(
     val name: String = "",
     val breed: String = "",
     val gender: String = "",

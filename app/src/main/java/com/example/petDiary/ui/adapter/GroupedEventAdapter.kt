@@ -10,15 +10,15 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.example.petDiary.R
-import com.example.petDiary.data.models.EventDto
+import com.example.petDiary.data.models.Event
 import java.text.SimpleDateFormat
 import java.util.*
 
 class GroupedEventAdapter(
     private val context: android.content.Context,
-    private val onEventClick: (EventDto) -> Unit,
-    private val onEventToggleComplete: (EventDto) -> Unit,
-    private val onEventDelete: (EventDto) -> Unit
+    private val onEventClick: (Event) -> Unit,
+    private val onEventToggleComplete: (Event) -> Unit,
+    private val onEventDelete: (Event) -> Unit
 ) : BaseAdapter() {
 
     private var items: List<ListItem> = listOf()
@@ -26,8 +26,7 @@ class GroupedEventAdapter(
     private val VIEW_TYPE_HEADER = 0
     private val VIEW_TYPE_EVENT = 1
 
-    // ← Метод обновления списка
-    fun updateList(events: List<EventDto>) {
+    fun updateList(events: List<Event>) {
         val groupedItems = mutableListOf<ListItem>()
         var lastDate = ""
 
@@ -41,7 +40,7 @@ class GroupedEventAdapter(
         }
 
         items = groupedItems
-        notifyDataSetChanged()  // ← Важно! Обновляет ListView
+        notifyDataSetChanged()
     }
 
     private fun isToday(dateMillis: Long): Boolean {
@@ -125,7 +124,7 @@ class GroupedEventAdapter(
         return view
     }
 
-    private fun getEventView(event: EventDto, convertView: View?, parent: ViewGroup?): View {
+    private fun getEventView(event: Event, convertView: View?, parent: ViewGroup?): View {
         val view = convertView ?: LayoutInflater.from(context)
             .inflate(R.layout.item_event, parent, false)
 
@@ -191,5 +190,5 @@ class GroupedEventAdapter(
 
 sealed class ListItem {
     data class DateHeader(val date: String, val dateMillis: Long) : ListItem()
-    data class EventItem(val event: EventDto) : ListItem()
+    data class EventItem(val event: Event) : ListItem()
 }

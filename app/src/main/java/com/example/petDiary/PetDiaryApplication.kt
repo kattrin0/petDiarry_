@@ -3,13 +3,15 @@ package com.example.petDiary
 import android.app.Application
 import android.content.pm.PackageManager
 import android.util.Log
-import com.example.petDiary.data.RetrofitClient
+import com.example.petDiary.data.network.RetrofitClient
+import com.example.petDiary.notification.NotificationService
 import com.yandex.mapkit.MapKitFactory
 
 class PetDiaryApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        NotificationService(this).createNotificationChannel()
         initYandexMapKit()
         RetrofitClient.initialize(this)
     }

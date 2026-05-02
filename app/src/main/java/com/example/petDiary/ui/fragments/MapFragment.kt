@@ -21,7 +21,7 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.petDiary.R
-import com.example.petDiary.data.PlacemarkData
+import com.example.petDiary.data.models.PlacemarkData
 import com.example.petDiary.ui.viewmodel.MapViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton

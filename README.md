@@ -8,8 +8,4 @@
 Курсовая работа:  [Курсовая petDiary.pdf](https://github.com/kattrin0/petDiarry_/blob/main/documentation/%D0%9A%D1%83%D1%80%D1%81%D0%BE%D0%B2%D0%B0%D1%8F%20petDiary.pdf)
 
 Видео работы приложения:
-figure class="video_container">
-  <iframe src="documentation/20864423889500.mp4" frameborder="0" allowfullscreen="true"> 
-</iframe>
-</figure>
 https://github.com/kattrin0/petDiarry_/blob/main/documentation/20864423889500.mp4

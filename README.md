@@ -2,7 +2,9 @@
 
 Код backend на Spring Boot находится в отдельном репозитории: https://github.com/kattrin0/petDiary_bd.git
 
-<<<<<<< HEAD
-=======
-Ссылка на презентацию: https://docs.google.com/presentation/d/1zRD7OZBmU2qsTZgTWgxu_H-Q-Y0WX-oUoN9w90Wb3Yw/edit?slide=id.p7#slide=id.p7
->>>>>>> 635f48bf8b9f4f133b318b93e2faebc800f7066e
+
+Презентация проекта: презентация_petDiary.pptx
+Курсовая работа:  Курсовая petDiary.pdf
+
+Видео работы приложения:
+https://github.com/kattrin0/petDiarry_/tree/main/video
